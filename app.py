@@ -2098,7 +2098,8 @@ st.markdown("""
   <a href="https://www.linkedin.com/in/mary-akinyuwa-700268165/">Mary Akinyuwa</a>
   · Life Scientist &amp; AI Strategist &nbsp;|&nbsp;
   <a href="https://github.com/Mary-Akinyuwa/plantpath-ai">PlantPath AI</a> ·
-  <a href="https://github.com/Mary-Akinyuwa/lifescience-servicenow-workflows">LifeScience ServiceNow</a>
+  <a href="https://github.com/Mary-Akinyuwa/lifescience-servicenow-workflows">LifeScience ServiceNow</a><br/>
+  <em style="color:#8ca9bb;font-size:0.78rem;">Data sourced from public USDA, USGS, and peer-reviewed databases. For informational purposes only. Not affiliated with or endorsed by any government agency.</em>
 </div>
 """, unsafe_allow_html=True)
 
