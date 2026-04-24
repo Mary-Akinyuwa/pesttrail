@@ -28,18 +28,33 @@ def _ga4_pageview():
             client_id = st.session_state.get("ga4_client_id", str(uuid.uuid4()))
             st.session_state["ga4_client_id"] = client_id
             session_id = str(abs(hash(client_id)) % 1_000_000_000)
+            # Capture real visitor IP for GA4 geo-resolution
+            # (Measurement Protocol sends from server IP otherwise — map stays blank)
+            client_ip = ""
+            try:
+                hdrs = st.context.headers
+                for _h in ["X-Forwarded-For", "CF-Connecting-IP", "X-Real-Ip"]:
+                    _v = hdrs.get(_h, "")
+                    if _v:
+                        client_ip = _v.split(",")[0].strip()
+                        break
+            except Exception:
+                pass
+            payload = {
+                "client_id": client_id,
+                "events": [{"name": "page_view", "params": {
+                    "page_title": "PestTrail",
+                    "page_location": "https://pesttrail.streamlit.app",
+                    "session_id": session_id,
+                    "engagement_time_msec": 1,
+                }}]
+            }
+            if client_ip:
+                payload["user_ip_address"] = client_ip
             _requests.post(
                 f"https://www.google-analytics.com/mp/collect"
                 f"?measurement_id=G-9MKGHB8W6R&api_secret={api_secret}",
-                json={
-                    "client_id": client_id,
-                    "events": [{"name": "page_view", "params": {
-                        "page_title": "PestTrail",
-                        "page_location": "https://pesttrail.streamlit.app",
-                        "session_id": session_id,
-                        "engagement_time_msec": 1,
-                    }}]
-                },
+                json=payload,
                 timeout=2
             )
     except Exception:
