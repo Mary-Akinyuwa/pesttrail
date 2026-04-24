@@ -215,12 +215,14 @@ button[title="streamlitApp"],
 [aria-label="streamlitApp"],
 [title="streamlitApp"] { display: none !important; }
 /* Remove the top gap left behind by the hidden header */
-div[data-testid="stAppViewContainer"] > section.main > div.block-container {
+div[data-testid="stMainBlockContainer"] {
     padding-top: 0rem !important;
 }
-div[data-testid="stAppViewContainer"] {
+div[data-testid="stMain"] {
     padding-top: 0 !important;
-    margin-top: 0 !important;
+}
+.main .block-container {
+    padding-top: 0rem !important;
 }
 
 
