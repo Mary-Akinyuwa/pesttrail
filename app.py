@@ -78,9 +78,9 @@ h1, h2, h3, h4, h5 {
 /* ── Streamlit main container ──────────────────────────────────── */
 .main .block-container {
     padding-top: 0 !important;
-    padding-left: 2.5rem;
-    padding-right: 2.5rem;
-    max-width: 1400px;
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+    max-width: 100% !important;
 }
 
 /* ── Sidebar — desktop only fixed width ────────────────────────── */
@@ -536,7 +536,7 @@ st.markdown(CUSTOM_CSS, unsafe_allow_html=True)
 # ══════════════════════════════════════════════════════════════════════════════
 def make_hero(n_records: int) -> str:
     return f"""
-<div style="width:100%;margin-bottom:0;margin-top:-16px;">
+<div style="width:calc(100% + 2rem);margin-left:-1rem;margin-right:-1rem;margin-bottom:0;margin-top:-4rem;">
 <svg viewBox="0 0 1200 340" xmlns="http://www.w3.org/2000/svg"
      style="width:100%;display:block;border-radius:0 0 14px 14px;">
   <defs>
