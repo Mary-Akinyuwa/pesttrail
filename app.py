@@ -17,6 +17,17 @@ st.set_page_config(
     layout="wide"
 )
 
+# ── Client-side GA4 (runs in visitor's browser — real IP → correct geo on map) ──
+components.html("""
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-9MKGHB8W6R"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-9MKGHB8W6R', { send_page_view: true });
+</script>
+""", height=0)
+
 # ── Server-side GA4 Measurement Protocol ─────────────────────────────────────
 def _ga4_pageview():
     try:
