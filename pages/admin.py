@@ -15,15 +15,22 @@ st.set_page_config(
     layout="wide"
 )
 
-DB_PATH  = Path(__file__).parent.parent / "analytics" / "visits.db"
-_SB_URL  = st.secrets.get("SUPABASE_URL", "") if hasattr(st, "secrets") else ""
-_SB_KEY  = st.secrets.get("SUPABASE_ANON_KEY", "") if hasattr(st, "secrets") else ""
+DB_PATH = Path(__file__).parent.parent / "analytics" / "visits.db"
+
+def _secret(key, default=""):
+    try:
+        return st.secrets[key]
+    except Exception:
+        return os.getenv(key, default)
+
+_SB_URL = _secret("SUPABASE_URL")
+_SB_KEY = _secret("SUPABASE_ANON_KEY")
 
 # --- Auth gate ---
 st.title("🔒 PestTrail Admin")
 st.caption("Visitor analytics — private access only")
 
-admin_pw = st.secrets.get("ADMIN_PASSWORD", os.getenv("ADMIN_PASSWORD", "changeme")) if hasattr(st, "secrets") else os.getenv("ADMIN_PASSWORD", "changeme")
+admin_pw = _secret("ADMIN_PASSWORD", "changeme")
 
 if "admin_authenticated" not in st.session_state:
     st.session_state.admin_authenticated = False

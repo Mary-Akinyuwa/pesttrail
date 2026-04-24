@@ -31,7 +31,7 @@ components.html("""
 # ── Server-side GA4 Measurement Protocol ─────────────────────────────────────
 def _ga4_pageview():
     try:
-        api_secret = st.secrets.get("GA4_API_SECRET", "")
+        api_secret = _secret("GA4_API_SECRET")
         if not api_secret:
             return
         if "ga4_sent" not in st.session_state:
@@ -910,8 +910,14 @@ def init_db():
     """)
     conn.commit(); conn.close()
 
-_SB_URL = st.secrets.get("SUPABASE_URL", "") if hasattr(st, "secrets") else ""
-_SB_KEY = st.secrets.get("SUPABASE_ANON_KEY", "") if hasattr(st, "secrets") else ""
+def _secret(key, default=""):
+    try:
+        return st.secrets[key]
+    except Exception:
+        return os.getenv(key, default)
+
+_SB_URL = _secret("SUPABASE_URL")
+_SB_KEY = _secret("SUPABASE_ANON_KEY")
 
 def log_visit(session_id, search_term, pest_type, origin_region, entry_mode, impact_sector):
     row = {
@@ -2343,5 +2349,5 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-_analytics_pw = st.secrets.get("ANALYTICS_PASSWORD", "") if hasattr(st, "secrets") else ""
+_analytics_pw = _secret("ANALYTICS_PASSWORD")
 streamlit_analytics.stop_tracking(unsafe_password=_analytics_pw)
