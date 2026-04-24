@@ -91,12 +91,47 @@ section[data-testid="stSidebar"] {
     min-width: 320px !important;
     max-width: 320px !important;
 }
-[data-testid="stSidebarResizeHandle"] { display: none !important; }
+[data-testid="stSidebarResizeHandle"],
+[class*="ResizeHandle"],
+[class*="resizeHandle"],
+[class*="resize-handle"] {
+    display: none !important;
+    width: 0 !important;
+    min-width: 0 !important;
+    max-width: 0 !important;
+    pointer-events: none !important;
+    visibility: hidden !important;
+}
 [data-testid="stSidebarNav"] { display: none !important; }
 [data-testid="stToolbar"] { display: none !important; }
 [data-testid="stSidebarCollapsedControl"] { display: none !important; }
 [data-testid="stSidebarCollapseButton"] { display: none !important; }
 header[data-testid="stHeader"] { display: none !important; }
+
+/* ── Mobile responsive ─────────────────────────────────────────── */
+@media (max-width: 768px) {
+    section[data-testid="stSidebar"] {
+        width: 100% !important;
+        min-width: 100% !important;
+        max-width: 100% !important;
+        position: relative !important;
+    }
+    .main .block-container {
+        padding: 1rem !important;
+        max-width: 100% !important;
+    }
+    .kpi-row {
+        flex-direction: column !important;
+    }
+    .kpi-card {
+        min-width: 100% !important;
+        width: 100% !important;
+    }
+    div[data-testid="stTabs"] button[role="tab"] {
+        font-size: 0.8rem !important;
+        padding: 6px 8px !important;
+    }
+}
 section[data-testid="stSidebar"] > div {
     padding-top: 1.5rem;
 }
