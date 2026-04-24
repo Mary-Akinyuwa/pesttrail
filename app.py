@@ -66,6 +66,7 @@ section[data-testid="stSidebar"] {
     background: #07334E !important;
     border-right: none;
 }
+[data-testid="stSidebarNav"] { display: none !important; }
 section[data-testid="stSidebar"] > div {
     padding-top: 1.5rem;
 }
