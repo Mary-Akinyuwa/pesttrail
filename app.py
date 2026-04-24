@@ -27,6 +27,7 @@ def _ga4_pageview():
             st.session_state["ga4_sent"] = True
             client_id = st.session_state.get("ga4_client_id", str(uuid.uuid4()))
             st.session_state["ga4_client_id"] = client_id
+            session_id = str(abs(hash(client_id)) % 1_000_000_000)
             _requests.post(
                 f"https://www.google-analytics.com/mp/collect"
                 f"?measurement_id=G-9MKGHB8W6R&api_secret={api_secret}",
@@ -34,7 +35,9 @@ def _ga4_pageview():
                     "client_id": client_id,
                     "events": [{"name": "page_view", "params": {
                         "page_title": "PestTrail",
-                        "page_location": "https://pesttrail.streamlit.app"
+                        "page_location": "https://pesttrail.streamlit.app",
+                        "session_id": session_id,
+                        "engagement_time_msec": 1,
                     }}]
                 },
                 timeout=2
