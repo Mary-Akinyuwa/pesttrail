@@ -620,9 +620,13 @@ div[data-testid="stTabContent"] {
 }
 /* Hide Streamlit Cloud deployer avatar and manage-app button */
 [data-testid="stStatusWidget"] { display: none !important; }
-.viewerBadge_container__r5tak { display: none !important; }
+[data-testid="stToolbar"] { display: none !important; }
+.viewerBadge_container__r5tak,
+.viewerBadge_link__qRIco,
+[class*="viewerBadge"] { display: none !important; }
 #MainMenu { visibility: hidden !important; }
-footer { visibility: hidden !important; }
+footer, footer * { visibility: hidden !important; height: 0 !important; }
+button[kind="header"] { display: none !important; }
 </style>
 """
 st.markdown(CUSTOM_CSS, unsafe_allow_html=True)
@@ -1772,14 +1776,15 @@ f'</div>', unsafe_allow_html=True)
             col = econ_color_map.get(pt, "#94a3b8")
             show_leg = pt not in seen_e
             seen_e.add(pt)
+            _lbl = r["mobile_label"] if is_mobile else r["bar_label"]
             fig.add_trace(_go2.Scatter(
                 x=[r["_val_billions"]],
                 y=[r["pest_common_name"]],
-                mode="markers" if is_mobile else "markers+text",
-                marker=dict(color=col, size=16 if is_mobile else 14, line=dict(color="white", width=1.5)),
-                text=[f"  {r['bar_label']}"],
+                mode="markers+text",
+                marker=dict(color=col, size=14, line=dict(color="white", width=1.5)),
+                text=[f"  {_lbl}"],
                 textposition="middle right",
-                textfont=dict(size=11, color="#1e293b"),
+                textfont=dict(size=9 if is_mobile else 11, color="#1e293b"),
                 cliponaxis=False,
                 name=pt, legendgroup=pt, showlegend=show_leg,
                 hovertemplate=(
@@ -1790,21 +1795,24 @@ f'</div>', unsafe_allow_html=True)
                 )
             ))
         x_max = top_econ["_val_billions"].max() if not top_econ.empty else 1
-        _econ_r = 20 if is_mobile else 120
+        _econ_r = 90 if is_mobile else 120
         _econ_b = 20 if is_mobile else _econ_leg_b
         fig.update_layout(
             height=height, showlegend=False,
             margin=dict(l=10, r=_econ_r, t=20, b=_econ_b),
             **BASE
         )
-        if is_mobile:
-            st.caption("Tap any dot to see the exact figure and source.")
         fig.update_xaxes(showgrid=True, gridcolor="#e2e8f0",
-                         range=[-0.5, x_max * (1.3 if is_mobile else 1.55)],
+                         range=[-0.5, x_max * (1.8 if is_mobile else 1.55)],
                          showticklabels=True, ticks="outside",
                          title_text="USD Billions — annual unless labeled cumulative", **TICK)
-        fig.update_yaxes(showgrid=False, automargin=True,
-                         showticklabels=True, **TICK)
+        if is_mobile:
+            _ytick_vals = list(top_econ["pest_common_name"])
+            _ytick_text = [n[:16] + "…" if len(n) > 16 else n for n in _ytick_vals]
+            fig.update_yaxes(showgrid=False, tickvals=_ytick_vals, ticktext=_ytick_text,
+                             tickfont=dict(size=9), showticklabels=True, **TICK)
+        else:
+            fig.update_yaxes(showgrid=False, automargin=True, showticklabels=True, **TICK)
         st.plotly_chart(fig, use_container_width=True, config=_PCFG)
         two_col_legend(econ_color_map, pull_up=0 if is_mobile else _econ_leg_b + 16)
 
@@ -2041,31 +2049,34 @@ with tab_detect:
                 fig.add_trace(_go.Scatter(
                     x=[r["detection_lag_years"]],
                     y=[r["pest_common_name"]],
-                    mode="markers" if is_mobile else "markers+text",
-                    marker=dict(color=col, size=16 if is_mobile else 14, line=dict(color="white", width=1.5)),
-                    text=[f"  {int(r['detection_lag_years'])} yrs"],
+                    mode="markers+text",
+                    marker=dict(color=col, size=14, line=dict(color="white", width=1.5)),
+                    text=[f"  {int(r['detection_lag_years'])}y" if is_mobile else f"  {int(r['detection_lag_years'])} yrs"],
                     textposition="middle right",
-                    textfont=dict(size=11, color="#1e293b"),
+                    textfont=dict(size=9 if is_mobile else 11, color="#1e293b"),
                     cliponaxis=False,
                     name=pt, legendgroup=pt, showlegend=show_leg,
                     hovertemplate=f"<b>{r['pest_common_name']}</b><br>Lag: {int(r['detection_lag_years'])} yrs<br>Type: {pt}<extra></extra>"
                 ))
             x_max = lag_df["detection_lag_years"].max()
-            _lag_r = 20 if is_mobile else 60
+            _lag_r = 60 if is_mobile else 60
             _lag_b = 20 if is_mobile else _lag_leg_b
             fig.update_layout(
                 height=adj_h, showlegend=False,
                 margin=dict(l=10, r=_lag_r, t=20, b=_lag_b),
                 **BASE
             )
-            if is_mobile:
-                st.caption("Tap any dot to see the detection lag in years.")
             fig.update_xaxes(showgrid=True, gridcolor="#e2e8f0", gridwidth=1,
-                             range=[-0.3, x_max * (1.2 if is_mobile else 1.3)],
+                             range=[-0.3, x_max * (1.6 if is_mobile else 1.3)],
                              showticklabels=True, ticks="outside",
                              title_text="Detection Lag (years)", **TICK)
-            fig.update_yaxes(showgrid=False, automargin=True,
-                             showticklabels=True, **TICK)
+            if is_mobile:
+                _lag_yvals = list(lag_df["pest_common_name"])
+                _lag_ytext = [n[:16] + "…" if len(n) > 16 else n for n in _lag_yvals]
+                fig.update_yaxes(showgrid=False, tickvals=_lag_yvals, ticktext=_lag_ytext,
+                                 tickfont=dict(size=9), showticklabels=True, **TICK)
+            else:
+                fig.update_yaxes(showgrid=False, automargin=True, showticklabels=True, **TICK)
             st.plotly_chart(fig, use_container_width=True, config=_PCFG)
             two_col_legend(color_map, pull_up=0 if is_mobile else _lag_leg_b + 16)
         else:
