@@ -594,18 +594,49 @@ def make_hero(n_records: int) -> str:
     </svg>
   </div>
 
-  <!-- Detection dots (decorative, mid-right area) -->
-  <div class="pt-hero-side" style="position:absolute;right:210px;top:35%;pointer-events:none;opacity:0.65;">
-    <svg width="120" height="80" viewBox="0 0 120 80" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="10" cy="20" r="4" fill="#86B233"/><circle cx="10" cy="20" r="8" fill="none" stroke="#86B233" stroke-width="1" opacity="0.4"/>
-      <circle cx="35" cy="12" r="3" fill="#86B233" opacity="0.6"/>
-      <circle cx="60" cy="24" r="5" fill="#EEB638"/><circle cx="60" cy="24" r="9" fill="none" stroke="#EEB638" stroke-width="1" opacity="0.4"/>
-      <circle cx="85" cy="14" r="3" fill="#86B233" opacity="0.7"/>
-      <circle cx="108" cy="22" r="4" fill="#116AAB" opacity="0.8"/>
-      <circle cx="18" cy="50" r="3" fill="#EEB638" opacity="0.6"/>
-      <circle cx="45" cy="44" r="4" fill="#86B233"/>
-      <circle cx="72" cy="55" r="3" fill="#86B233" opacity="0.5"/>
-      <circle cx="98" cy="46" r="5" fill="#86B233"/>
+  <!-- Detection panel: label + dot grid + legend -->
+  <div class="pt-hero-side" style="position:absolute;right:204px;top:50%;
+    transform:translateY(-50%);pointer-events:none;opacity:0.85;">
+    <svg width="210" height="148" viewBox="0 0 210 148" xmlns="http://www.w3.org/2000/svg">
+      <!-- Label -->
+      <text x="0" y="13" font-family="Oswald,sans-serif" font-size="11" font-weight="600"
+            fill="#86B233" letter-spacing="0.12em" opacity="0.9">DETECTION MAP</text>
+      <!-- Row 1 dots -->
+      <circle cx="10"  cy="32" r="5" fill="#86B233"/><circle cx="10"  cy="32" r="9" fill="none" stroke="#86B233" stroke-width="1" opacity="0.4"/>
+      <circle cx="38"  cy="24" r="4" fill="#86B233" opacity="0.6"/>
+      <circle cx="66"  cy="37" r="6" fill="#EEB638"/><circle cx="66"  cy="37" r="10" fill="none" stroke="#EEB638" stroke-width="1" opacity="0.4"/>
+      <circle cx="94"  cy="27" r="4" fill="#86B233" opacity="0.7"/>
+      <circle cx="122" cy="40" r="5" fill="#86B233"/>
+      <circle cx="152" cy="24" r="6" fill="#116AAB" opacity="0.8"/>
+      <circle cx="180" cy="36" r="4" fill="#86B233" opacity="0.6"/>
+      <!-- Row 2 dots -->
+      <circle cx="18"  cy="64" r="4" fill="#86B233" opacity="0.6"/>
+      <circle cx="48"  cy="57" r="6" fill="#EEB638"/><circle cx="48" cy="57" r="10" fill="none" stroke="#EEB638" stroke-width="1" opacity="0.35"/>
+      <circle cx="76"  cy="70" r="5" fill="#86B233"/>
+      <circle cx="104" cy="60" r="4" fill="#86B233" opacity="0.5"/>
+      <circle cx="132" cy="72" r="6" fill="#116AAB" opacity="0.75"/>
+      <circle cx="160" cy="62" r="5" fill="#86B233" opacity="0.7"/>
+      <circle cx="188" cy="74" r="4" fill="#EEB638" opacity="0.6"/>
+      <!-- Legend -->
+      <circle cx="6"   cy="106" r="5" fill="#86B233"/>
+      <text x="16" y="111" font-family="Roboto,sans-serif" font-size="11" fill="#a8c8dc">Established</text>
+      <circle cx="100" cy="106" r="5" fill="#EEB638"/>
+      <text x="110" y="111" font-family="Roboto,sans-serif" font-size="11" fill="#a8c8dc">Active Spread</text>
+      <circle cx="6"   cy="128" r="5" fill="#116AAB"/>
+      <text x="16" y="133" font-family="Roboto,sans-serif" font-size="11" fill="#a8c8dc">New Detection</text>
+    </svg>
+  </div>
+
+  <!-- Invasion spread path -->
+  <div class="pt-hero-side" style="position:absolute;left:620px;top:55%;
+    transform:translateY(-50%);pointer-events:none;opacity:0.45;">
+    <svg width="200" height="60" viewBox="0 0 200 60" xmlns="http://www.w3.org/2000/svg">
+      <path d="M 0 40 Q 60 10 120 30 Q 155 42 160 20"
+            fill="none" stroke="#86B233" stroke-width="2" stroke-dasharray="8,6"/>
+      <circle cx="70"  cy="22" r="6" fill="#86B233" opacity="0.3"/>
+      <circle cx="70"  cy="22" r="11" fill="none" stroke="#86B233" stroke-width="1.5" opacity="0.2"/>
+      <circle cx="130" cy="32" r="6" fill="#EEB638" opacity="0.5"/>
+      <circle cx="130" cy="32" r="11" fill="none" stroke="#EEB638" stroke-width="1.5" opacity="0.3"/>
     </svg>
   </div>
 
