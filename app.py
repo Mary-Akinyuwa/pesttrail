@@ -573,8 +573,21 @@ def make_hero(n_records: int) -> str:
 <style>
 .pt-hero-side {{ display:block; }}
 @media (max-width:860px) {{ .pt-hero-side {{ display:none !important; }} }}
+@media (max-width:768px) {{
+  .pt-hero-outer {{
+    padding: 24px 18px 52px 18px !important;
+    min-height: auto !important;
+  }}
+  .pt-hero-content {{ max-width: 100% !important; }}
+  .pt-hero-pest  {{ font-size: 2.8rem !important; }}
+  .pt-hero-trail {{ font-size: 2rem   !important; }}
+  .pt-hero-underline {{ width: 160px !important; margin: 8px 0 12px 0 !important; }}
+  .pt-hero-sub  {{ font-size: 0.9rem !important; margin-bottom: 5px !important; }}
+  .pt-hero-tag  {{ font-size: 0.76rem !important; margin-bottom: 16px !important; }}
+  .pt-hero-chip {{ padding: 5px 12px !important; font-size: 0.74rem !important; }}
+}}
 </style>
-<div style="
+<div class="pt-hero-outer" style="
   width:100%;min-height:340px;
   padding:56px 52px 80px 52px;
   background:linear-gradient(135deg,#04243a 0%,#07334E 60%,#0d4a2e 100%);
@@ -722,27 +735,27 @@ def make_hero(n_records: int) -> str:
   </div>
 
   <!-- Main left content -->
-  <div style="position:relative;z-index:1;max-width:600px;">
+  <div class="pt-hero-content" style="position:relative;z-index:1;max-width:600px;">
     <div style="font-family:'Oswald',sans-serif;font-weight:700;
       line-height:1;letter-spacing:0.04em;margin-bottom:0;">
-      <span style="font-size:4.8rem;color:#ffffff;">PEST</span><span style="font-size:3.4rem;color:#86B233;">TRAIL</span>
+      <span class="pt-hero-pest" style="font-size:4.8rem;color:#ffffff;">PEST</span><span class="pt-hero-trail" style="font-size:3.4rem;color:#86B233;">TRAIL</span>
     </div>
-    <div style="width:280px;height:4px;background:#86B233;border-radius:2px;margin:10px 0 16px 0;"></div>
-    <div style="font-family:'Roboto',sans-serif;font-size:1rem;font-weight:300;
+    <div class="pt-hero-underline" style="width:280px;height:4px;background:#86B233;border-radius:2px;margin:10px 0 16px 0;"></div>
+    <div class="pt-hero-sub" style="font-family:'Roboto',sans-serif;font-size:1rem;font-weight:300;
       color:#a8c8dc;letter-spacing:0.02em;margin-bottom:6px;">
       US Invasive Pest &amp; Pathogen Intelligence Platform
     </div>
-    <div style="font-family:'Roboto',sans-serif;font-size:0.8rem;color:#6a9aaf;margin-bottom:26px;">
+    <div class="pt-hero-tag" style="font-family:'Roboto',sans-serif;font-size:0.8rem;color:#6a9aaf;margin-bottom:26px;">
       Tracking pests &middot; pathogens &middot; inocula introduced since 1995
     </div>
-    <div style="display:flex;gap:10px;flex-wrap:wrap;">
-      <div style="background:rgba(134,178,51,0.18);border:1px solid rgba(134,178,51,0.7);
+    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+      <div class="pt-hero-chip" style="background:rgba(134,178,51,0.18);border:1px solid rgba(134,178,51,0.7);
         border-radius:4px;padding:7px 18px;font-family:'Oswald',sans-serif;font-size:0.82rem;
         font-weight:600;color:#86B233;letter-spacing:0.04em;">{n_records} SPECIES TRACKED</div>
-      <div style="background:rgba(17,106,171,0.18);border:1px solid rgba(17,106,171,0.7);
+      <div class="pt-hero-chip" style="background:rgba(17,106,171,0.18);border:1px solid rgba(17,106,171,0.7);
         border-radius:4px;padding:7px 18px;font-family:'Oswald',sans-serif;font-size:0.82rem;
         font-weight:600;color:#116AAB;letter-spacing:0.04em;">1995 — 2026</div>
-      <div style="background:rgba(238,182,56,0.15);border:1px solid rgba(238,182,56,0.7);
+      <div class="pt-hero-chip" style="background:rgba(238,182,56,0.15);border:1px solid rgba(238,182,56,0.7);
         border-radius:4px;padding:7px 18px;font-family:'Oswald',sans-serif;font-size:0.82rem;
         font-weight:600;color:#EEB638;letter-spacing:0.04em;">PEER-REVIEWED</div>
     </div>
