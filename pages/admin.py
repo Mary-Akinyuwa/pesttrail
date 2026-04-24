@@ -35,6 +35,10 @@ if not st.session_state.admin_authenticated:
             st.error("Incorrect password.")
     st.stop()
 
+# --- GA4 IP capture diagnostic (shows what IP is being sent to GA4 for your own session) ---
+_dbg_ip = st.session_state.get("_dbg_ip_header", "(visit main page first)")
+st.info(f"🔍 **GA4 IP sent for your session:** `{_dbg_ip}` — if this shows a real IP (not blank/not-captured), geo tracking is working.")
+
 # --- Load analytics data ---
 def load_visits():
     if not DB_PATH.exists():

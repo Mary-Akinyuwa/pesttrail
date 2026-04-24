@@ -30,14 +30,21 @@ def _ga4_pageview():
             session_id = str(abs(hash(client_id)) % 1_000_000_000)
             # Capture real visitor IP for GA4 geo-resolution
             # (Measurement Protocol sends from server IP otherwise — map stays blank)
+            # Streamlit Cloud uses Cloudflare — CF-Connecting-IP is the most reliable single-IP header
             client_ip = ""
             try:
                 hdrs = st.context.headers
-                for _h in ["X-Forwarded-For", "CF-Connecting-IP", "X-Real-Ip"]:
+                for _h in [
+                    "CF-Connecting-IP", "cf-connecting-ip",
+                    "X-Forwarded-For", "x-forwarded-for",
+                    "True-Client-IP", "true-client-ip",
+                    "X-Real-Ip", "x-real-ip",
+                ]:
                     _v = hdrs.get(_h, "")
                     if _v:
                         client_ip = _v.split(",")[0].strip()
                         break
+                st.session_state["_dbg_ip_header"] = client_ip or "(not captured)"
             except Exception:
                 pass
             payload = {
