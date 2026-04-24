@@ -15,8 +15,8 @@ st.set_page_config(
     layout="wide"
 )
 
-# Google Analytics 4
-components.html("""
+# Google Analytics 4 — injected into main page (not iframe)
+st.markdown("""
 <!-- Google tag (gtag.js) -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-9MKGHB8W6R"></script>
 <script>
@@ -25,7 +25,7 @@ components.html("""
   gtag('js', new Date());
   gtag('config', 'G-9MKGHB8W6R');
 </script>
-""", height=0)
+""", unsafe_allow_html=True)
 
 # ══════════════════════════════════════════════════════════════════════════════
 # CUSTOM CSS  — Oswald headings · Roboto body · STELLA/FAO/Corteva aesthetic
@@ -65,7 +65,11 @@ h1, h2, h3, h4, h5 {
 section[data-testid="stSidebar"] {
     background: #07334E !important;
     border-right: none;
+    width: 320px !important;
+    min-width: 320px !important;
+    max-width: 320px !important;
 }
+[data-testid="stSidebarResizeHandle"] { display: none !important; }
 [data-testid="stSidebarNav"] { display: none !important; }
 [data-testid="stToolbar"] { display: none !important; }
 header[data-testid="stHeader"] { display: none !important; }
