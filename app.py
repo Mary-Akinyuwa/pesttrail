@@ -26,6 +26,37 @@ components.html("""
   gtag('js', new Date());
   gtag('config', 'G-9MKGHB8W6R', { send_page_view: true });
 </script>
+<script>
+(function() {
+  var HIDE = [
+    '[data-testid="stStatusWidget"]',
+    '[data-testid="stToolbar"]',
+    '[data-testid="stToolbarActions"]',
+    '[data-testid="stDecoration"]',
+    '[data-testid="manage-app-button"]',
+    '[class*="viewerBadge"]',
+    '[class*="ProfileImage"]',
+    '[class*="profile-image"]',
+    '[class*="stDeployButton"]',
+    '#MainMenu',
+    'footer'
+  ];
+  function hide() {
+    try {
+      var doc = window.parent.document;
+      HIDE.forEach(function(sel) {
+        doc.querySelectorAll(sel).forEach(function(el) {
+          el.style.cssText = 'display:none!important;visibility:hidden!important;height:0!important;overflow:hidden!important;';
+        });
+      });
+    } catch(e) {}
+  }
+  hide();
+  setTimeout(hide, 500);
+  setTimeout(hide, 2000);
+  setTimeout(hide, 5000);
+})();
+</script>
 """, height=0)
 
 # ── Server-side GA4 Measurement Protocol ─────────────────────────────────────
