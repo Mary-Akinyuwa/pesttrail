@@ -2273,4 +2273,5 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-streamlit_analytics.stop_tracking(unsafe_password="PestTrail2026!")
+_analytics_pw = st.secrets.get("ANALYTICS_PASSWORD", "") if hasattr(st, "secrets") else ""
+streamlit_analytics.stop_tracking(unsafe_password=_analytics_pw)
