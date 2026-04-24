@@ -67,6 +67,8 @@ section[data-testid="stSidebar"] {
     border-right: none;
 }
 [data-testid="stSidebarNav"] { display: none !important; }
+[data-testid="stToolbar"] { display: none !important; }
+header[data-testid="stHeader"] { display: none !important; }
 section[data-testid="stSidebar"] > div {
     padding-top: 1.5rem;
 }
