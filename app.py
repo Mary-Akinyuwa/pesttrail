@@ -1810,7 +1810,8 @@ f'</div>', unsafe_allow_html=True)
             _ytick_vals = list(top_econ["pest_common_name"])
             _ytick_text = [n[:16] + "…" if len(n) > 16 else n for n in _ytick_vals]
             fig.update_yaxes(showgrid=False, tickvals=_ytick_vals, ticktext=_ytick_text,
-                             tickfont=dict(size=9), showticklabels=True, **TICK)
+                             tickfont=dict(size=9, color="#1e293b"),
+                             title_font=dict(size=12, color="#1e293b"), showticklabels=True)
         else:
             fig.update_yaxes(showgrid=False, automargin=True, showticklabels=True, **TICK)
         st.plotly_chart(fig, use_container_width=True, config=_PCFG)
@@ -2074,7 +2075,8 @@ with tab_detect:
                 _lag_yvals = list(lag_df["pest_common_name"])
                 _lag_ytext = [n[:16] + "…" if len(n) > 16 else n for n in _lag_yvals]
                 fig.update_yaxes(showgrid=False, tickvals=_lag_yvals, ticktext=_lag_ytext,
-                                 tickfont=dict(size=9), showticklabels=True, **TICK)
+                                 tickfont=dict(size=9, color="#1e293b"),
+                                 title_font=dict(size=12, color="#1e293b"), showticklabels=True)
             else:
                 fig.update_yaxes(showgrid=False, automargin=True, showticklabels=True, **TICK)
             st.plotly_chart(fig, use_container_width=True, config=_PCFG)
