@@ -618,6 +618,11 @@ div[data-testid="stTabContent"] {
     padding: 32px 32px 40px 32px !important;
     box-shadow: 0 6px 24px rgba(7,51,78,0.08) !important;
 }
+/* Hide Streamlit Cloud deployer avatar and manage-app button */
+[data-testid="stStatusWidget"] { display: none !important; }
+.viewerBadge_container__r5tak { display: none !important; }
+#MainMenu { visibility: hidden !important; }
+footer { visibility: hidden !important; }
 </style>
 """
 st.markdown(CUSTOM_CSS, unsafe_allow_html=True)
@@ -1767,15 +1772,14 @@ f'</div>', unsafe_allow_html=True)
             col = econ_color_map.get(pt, "#94a3b8")
             show_leg = pt not in seen_e
             seen_e.add(pt)
-            _lbl = r["mobile_label"] if is_mobile else r["bar_label"]
             fig.add_trace(_go2.Scatter(
                 x=[r["_val_billions"]],
                 y=[r["pest_common_name"]],
-                mode="markers+text",
-                marker=dict(color=col, size=14, line=dict(color="white", width=1.5)),
-                text=[f"  {_lbl}"],
+                mode="markers" if is_mobile else "markers+text",
+                marker=dict(color=col, size=16 if is_mobile else 14, line=dict(color="white", width=1.5)),
+                text=[f"  {r['bar_label']}"],
                 textposition="middle right",
-                textfont=dict(size=9 if is_mobile else 11, color="#1e293b"),
+                textfont=dict(size=11, color="#1e293b"),
                 cliponaxis=False,
                 name=pt, legendgroup=pt, showlegend=show_leg,
                 hovertemplate=(
@@ -1786,15 +1790,17 @@ f'</div>', unsafe_allow_html=True)
                 )
             ))
         x_max = top_econ["_val_billions"].max() if not top_econ.empty else 1
-        _econ_r = 10 if is_mobile else 120
+        _econ_r = 20 if is_mobile else 120
         _econ_b = 20 if is_mobile else _econ_leg_b
         fig.update_layout(
             height=height, showlegend=False,
             margin=dict(l=10, r=_econ_r, t=20, b=_econ_b),
             **BASE
         )
+        if is_mobile:
+            st.caption("Tap any dot to see the exact figure and source.")
         fig.update_xaxes(showgrid=True, gridcolor="#e2e8f0",
-                         range=[-0.5, x_max * (3.2 if is_mobile else 1.55)],
+                         range=[-0.5, x_max * (1.3 if is_mobile else 1.55)],
                          showticklabels=True, ticks="outside",
                          title_text="USD Billions — annual unless labeled cumulative", **TICK)
         fig.update_yaxes(showgrid=False, automargin=True,
@@ -2035,25 +2041,27 @@ with tab_detect:
                 fig.add_trace(_go.Scatter(
                     x=[r["detection_lag_years"]],
                     y=[r["pest_common_name"]],
-                    mode="markers+text",
-                    marker=dict(color=col, size=14, line=dict(color="white", width=1.5)),
-                    text=[f"  {int(r['detection_lag_years'])}y" if is_mobile else f"  {int(r['detection_lag_years'])} yrs"],
+                    mode="markers" if is_mobile else "markers+text",
+                    marker=dict(color=col, size=16 if is_mobile else 14, line=dict(color="white", width=1.5)),
+                    text=[f"  {int(r['detection_lag_years'])} yrs"],
                     textposition="middle right",
-                    textfont=dict(size=9 if is_mobile else 11, color="#1e293b"),
+                    textfont=dict(size=11, color="#1e293b"),
                     cliponaxis=False,
                     name=pt, legendgroup=pt, showlegend=show_leg,
                     hovertemplate=f"<b>{r['pest_common_name']}</b><br>Lag: {int(r['detection_lag_years'])} yrs<br>Type: {pt}<extra></extra>"
                 ))
             x_max = lag_df["detection_lag_years"].max()
-            _lag_r = 10 if is_mobile else 60
+            _lag_r = 20 if is_mobile else 60
             _lag_b = 20 if is_mobile else _lag_leg_b
             fig.update_layout(
                 height=adj_h, showlegend=False,
                 margin=dict(l=10, r=_lag_r, t=20, b=_lag_b),
                 **BASE
             )
+            if is_mobile:
+                st.caption("Tap any dot to see the detection lag in years.")
             fig.update_xaxes(showgrid=True, gridcolor="#e2e8f0", gridwidth=1,
-                             range=[-0.3, x_max * (2.8 if is_mobile else 1.3)],
+                             range=[-0.3, x_max * (1.2 if is_mobile else 1.3)],
                              showticklabels=True, ticks="outside",
                              title_text="Detection Lag (years)", **TICK)
             fig.update_yaxes(showgrid=False, automargin=True,
