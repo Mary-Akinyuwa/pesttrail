@@ -185,6 +185,11 @@ button[title="streamlitApp"],
     .pt-section-title { font-size: 1.15rem !important; }
     .pt-section-sub { font-size: 0.78rem !important; }
     .pt-section-header { padding: 14px 16px 12px 16px !important; gap: 10px !important; }
+    /* Plotly charts — fill width, hide toolbar, allow vertical scroll */
+    .stPlotlyChart { overflow-x: hidden !important; width: 100% !important; }
+    .js-plotly-plot .modebar-container { display: none !important; }
+    /* Dataframes — scrollable on mobile */
+    .stDataFrame { overflow-x: auto !important; }
 }
 section[data-testid="stSidebar"] > div {
     padding-top: 1.5rem;
@@ -1166,6 +1171,10 @@ BASE = dict(
     font=dict(family="Roboto, sans-serif", size=15, color="#1e293b"),
 )
 TICK = dict(tickfont=dict(size=15, color="#1e293b"), title_font=dict(size=15, color="#1e293b"))
+# Chart heights — smaller on mobile so charts fit without scrolling
+_CH = dict(small=240 if is_mobile else 310, medium=290 if is_mobile else 400,
+           large=300 if is_mobile else 480, hrow=36 if is_mobile else 52)
+_PCFG = dict(displayModeBar=False, responsive=True)
 
 (tab_econ, tab_policy, tab_sector, tab_erad, tab_pathway, tab_detect) = st.tabs([
     "💰 Economic Impact",
@@ -1340,7 +1349,7 @@ with tab_policy:
         hovertemplate="%{x}: %{y} species total<extra></extra>"
     ))
     _fig_trend.update_layout(
-        height=310,
+        height=_CH['small'],
         margin=dict(l=10, r=60, t=30, b=70),
         legend=dict(orientation="h", y=-0.26, x=0, font=dict(size=11, color="#1e293b"),
                     bgcolor="rgba(0,0,0,0)"),
@@ -1360,7 +1369,7 @@ with tab_policy:
         "Sources: Fantle-Lepczyk et al. 2022 Sci. Total Environ. 819:153048 · USDA APHIS FY2025 CJ PPA §7721 · "
         "Liebhold & Tobin (2008) Annu. Rev. Entomol. 53:387–408 · OTA 1993 OTA-F-565"
     )
-    st.plotly_chart(_fig_trend, use_container_width=True)
+    st.plotly_chart(_fig_trend, use_container_width=True, config=_PCFG)
 
 with tab_erad:
     # ══════════════════════════════════════════════════════════════════════════════
@@ -1658,7 +1667,7 @@ f'</div>', unsafe_allow_html=True)
                          title_text="USD Billions — annual unless labeled cumulative", **TICK)
         fig.update_yaxes(showgrid=False, automargin=True,
                          showticklabels=True, **TICK)
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, use_container_width=True, config=_PCFG)
         two_col_legend(econ_color_map, pull_up=_econ_leg_b + 16)
 
         # ── Source transparency footer ────────────────────────────────────────────
@@ -1874,7 +1883,7 @@ with tab_detect:
             lag_df = lag_df.copy()
             import plotly.graph_objects as _go
             color_map    = {t: COLORS[i % len(COLORS)] for i, t in enumerate(lag_df["pest_type"].unique())}
-            adj_h        = 480
+            adj_h        = _CH['large']
             _lag_leg_rows = -(-len(color_map) // 2)
             _lag_leg_b    = _lag_leg_rows * 25 + 56
             row_h         = 40
@@ -1914,7 +1923,7 @@ with tab_detect:
                              title_text="Detection Lag (years)", **TICK)
             fig.update_yaxes(showgrid=False, automargin=True,
                              showticklabels=True, **TICK)
-            st.plotly_chart(fig, width="stretch")
+            st.plotly_chart(fig, use_container_width=True, config=_PCFG)
             two_col_legend(color_map, pull_up=_lag_leg_b + 16)
         else:
             st.info("No detection lag data for current selection.")
@@ -1978,7 +1987,7 @@ with tab_detect:
                 pull=pull_vals,
             ))
             fig.update_layout(
-                height=480, showlegend=True,
+                height=_CH['large'], showlegend=True,
                 legend=dict(
                     orientation="v", x=1.02, y=0.5, xanchor="left",
                     font=dict(size=11, color="#1e293b"),
@@ -1988,7 +1997,7 @@ with tab_detect:
                 margin=dict(l=10, r=170, t=20, b=20),
                 **BASE
             )
-            st.plotly_chart(fig, width="stretch")
+            st.plotly_chart(fig, use_container_width=True, config=_PCFG)
 
     # ══════════════════════════════════════════════════════════════════════════════
     # PEST INTELLIGENCE DATABASE TABLE
@@ -2088,12 +2097,12 @@ with tab_pathway:
                 hovertemplate="<b>%{label}</b><br>%{value} species<extra></extra>"
             )
             fig.update_layout(
-                height=400,
+                height=_CH['medium'],
                 coloraxis_showscale=False,
                 margin=dict(l=10, r=10, t=20, b=10),
                 **BASE
             )
-            st.plotly_chart(fig, use_container_width=True)
+            st.plotly_chart(fig, use_container_width=True, config=_PCFG)
 
     with col_d:
         fig_note(
@@ -2112,7 +2121,7 @@ with tab_pathway:
                          labels={"year":"Year First Detected","count":"New Detections"})
             fig.update_traces(textposition="outside", textfont=dict(size=11, color="#1e293b"))
             fig.update_layout(
-                height=400, showlegend=False, coloraxis_showscale=False,
+                height=_CH['medium'], showlegend=False, coloraxis_showscale=False,
                 margin=dict(l=60, r=20, t=30, b=80),
                 **BASE
             )
@@ -2120,7 +2129,7 @@ with tab_pathway:
                              range=[1989, year_counts["year"].max() + 1.5], **TICK)
             fig.update_yaxes(showgrid=True, gridcolor="#e2e8f0",
                              title_text="New Detections", **TICK)
-            st.plotly_chart(fig, width="stretch")
+            st.plotly_chart(fig, use_container_width=True, config=_PCFG)
 
     # ══════════════════════════════════════════════════════════════════════════════
     # PATHWAY HOTSPOT
@@ -2172,7 +2181,7 @@ with tab_pathway:
             zmin=0,
         ))
         fig.update_layout(
-            height=max(320, len(heat_pivot) * 52 + 120),
+            height=max(_CH['small'], len(heat_pivot) * _CH['hrow'] + 120),
             margin=dict(l=10, r=100, t=20, b=120),
             xaxis=dict(tickangle=-30, tickfont=dict(size=11, color="#1e293b"),
                        title_text="Entry Commodity Category", title_font=dict(size=12, color="#1e293b")),
@@ -2185,7 +2194,7 @@ with tab_pathway:
             "Heatmap showing the intersection of pest origin region and US entry commodity category. Darker cells indicate more species sharing that origin–pathway combination. Hover any cell for pest names.",
             "Cell values = number of species. Hover for pest names. Origin and commodity normalised from raw CSV entries — raw data available in Biosurveillance & Records."
         )
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, use_container_width=True, config=_PCFG)
 
 # ══════════════════════════════════════════════════════════════════════════════
 # FOOTER
