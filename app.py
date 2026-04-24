@@ -537,7 +537,7 @@ st.markdown(CUSTOM_CSS, unsafe_allow_html=True)
 def make_hero(n_records: int) -> str:
     return f"""
 <div style="width:100%;margin-bottom:0;margin-top:-16px;">
-<svg viewBox="0 0 1200 280" xmlns="http://www.w3.org/2000/svg"
+<svg viewBox="0 0 1200 340" xmlns="http://www.w3.org/2000/svg"
      style="width:100%;display:block;border-radius:0 0 14px 14px;">
   <defs>
     <linearGradient id="sky" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -935,7 +935,7 @@ if selected_status != "All": filtered = filtered[filtered["eradication_status"] 
 # ══════════════════════════════════════════════════════════════════════════════
 # HERO
 # ══════════════════════════════════════════════════════════════════════════════
-components.html(make_hero(len(df)), height=292, scrolling=False)
+components.html(make_hero(len(df)), height=390, scrolling=False)
 
 # ══════════════════════════════════════════════════════════════════════════════
 # SEARCH RESULT DETAIL CARD
