@@ -2064,6 +2064,8 @@ with tab_detect:
             st.info("No detection lag data for current selection.")
 
     with col_b:
+        if is_mobile:
+            st.markdown('<div style="height:20px"></div>', unsafe_allow_html=True)
         fig_note(
             "Pests by Origin Region",
             "Pie chart showing the proportion of tracked invasive species by broad geographic region of origin. Hover any slice to see the species count.",
