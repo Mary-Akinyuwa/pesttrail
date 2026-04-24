@@ -83,54 +83,74 @@ h1, h2, h3, h4, h5 {
     max-width: 1400px;
 }
 
-/* ── Sidebar ───────────────────────────────────────────────────── */
+/* ── Sidebar — desktop only fixed width ────────────────────────── */
+@media (min-width: 769px) {
+    section[data-testid="stSidebar"] {
+        width: 320px !important;
+        min-width: 320px !important;
+        max-width: 320px !important;
+    }
+    [data-testid="stSidebarResizeHandle"],
+    [class*="ResizeHandle"],
+    [class*="resizeHandle"],
+    [class*="resize-handle"] {
+        display: none !important;
+        pointer-events: none !important;
+        visibility: hidden !important;
+    }
+    [data-testid="stSidebarCollapsedControl"] { display: none !important; }
+    [data-testid="stSidebarCollapseButton"] { display: none !important; }
+}
 section[data-testid="stSidebar"] {
     background: #07334E !important;
     border-right: none;
-    width: 320px !important;
-    min-width: 320px !important;
-    max-width: 320px !important;
-}
-[data-testid="stSidebarResizeHandle"],
-[class*="ResizeHandle"],
-[class*="resizeHandle"],
-[class*="resize-handle"] {
-    display: none !important;
-    width: 0 !important;
-    min-width: 0 !important;
-    max-width: 0 !important;
-    pointer-events: none !important;
-    visibility: hidden !important;
+    position: relative !important;
+    height: auto !important;
+    overflow: visible !important;
 }
 [data-testid="stSidebarNav"] { display: none !important; }
 [data-testid="stToolbar"] { display: none !important; }
-[data-testid="stSidebarCollapsedControl"] { display: none !important; }
-[data-testid="stSidebarCollapseButton"] { display: none !important; }
 header[data-testid="stHeader"] { display: none !important; }
 
-/* ── Mobile responsive ─────────────────────────────────────────── */
+/* ── Mobile ────────────────────────────────────────────────────── */
 @media (max-width: 768px) {
     section[data-testid="stSidebar"] {
-        width: 100% !important;
-        min-width: 100% !important;
-        max-width: 100% !important;
-        position: relative !important;
+        width: 100vw !important;
+        min-width: 0 !important;
+        max-width: 100vw !important;
+        position: fixed !important;
+        z-index: 999 !important;
+        transform: translateX(-100%);
+        transition: transform 0.3s ease;
+    }
+    section[data-testid="stSidebar"][aria-expanded="true"] {
+        transform: translateX(0);
     }
     .main .block-container {
-        padding: 1rem !important;
-        max-width: 100% !important;
+        padding: 0.75rem !important;
+        max-width: 100vw !important;
+        width: 100vw !important;
+        overflow-x: hidden !important;
+    }
+    [data-testid="stAppViewContainer"],
+    [data-testid="stMain"] {
+        width: 100vw !important;
+        overflow-x: hidden !important;
     }
     .kpi-row {
         flex-direction: column !important;
+        gap: 10px !important;
     }
     .kpi-card {
         min-width: 100% !important;
         width: 100% !important;
     }
     div[data-testid="stTabs"] button[role="tab"] {
-        font-size: 0.8rem !important;
-        padding: 6px 8px !important;
+        font-size: 0.75rem !important;
+        padding: 4px 6px !important;
     }
+    .pt-section-title { font-size: 1.2rem !important; }
+    .pt-section-sub { font-size: 0.8rem !important; }
 }
 section[data-testid="stSidebar"] > div {
     padding-top: 1.5rem;
