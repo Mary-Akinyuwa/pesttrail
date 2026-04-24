@@ -1,0 +1,29 @@
+# Credentials — never push
+.env
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Private analytics database
+data/visits.db
+
+# Operational logs
+data/update_agent.log
+*.log
+
+# IDE
+.vscode/
+.idea/
+
+# Virtual environments
+venv/
+.venv/
+env/

@@ -1,0 +1,122 @@
+{
+  "_metadata": {
+    "last_updated": "2026-04-15",
+    "update_source": "Fantle-Lepczyk et al. 2022 Sci. Total Environ. 819:153048 · USDA APHIS FY2025 PPA 7721 Spending Plan · Diagne et al. 2021 Nature 592:571-576 · USDA ERS Fruit and Tree Nuts Outlook 2024 · USDA FS FHP Annual Report 2022 · Bandara et al. 2025 Plant Dis. · USDA ERS Wheat Outlook 2024 · Harper et al. 2019 Penn State Ext. · Bee Informed Partnership 2024-25",
+    "next_review": "2027-01-01",
+    "agent_version": "3.0",
+    "sanity_check": "PestTrail Sanity Check Agent — 20/20 claims verified April 2026"
+  },
+  "policy_gap": {
+    "annual_damage_billion": 21,
+    "annual_damage_label": "~$21B",
+    "annual_prevention_million": 70.7,
+    "annual_prevention_label": "$70.7M",
+    "loss_ratio": "~297×",
+    "roi_per_dollar": "~$17 (OTA 1993)",
+    "plum_pox_cost_million": 65,
+    "plum_pox_avoided_billion": 4.7,
+    "plum_pox_roi": "~72×",
+    "eradication_window_years": 5,
+    "sources": [
+      "Fantle-Lepczyk et al. 2022 Sci. Total Environ. 819:153048 (US observed costs 1960–2020)",
+      "USDA APHIS FY2025 PPA §7721 Spending Plan (prevention budget — EDRR line item)",
+      "Diagne et al. 2021 Nature 592:571-576 (InvaCost global database)",
+      "Liebhold & Tobin 2008 Annu. Rev. Entomol. 53:387-408 (eradication window)",
+      "USDA NASS 2022-2024 average (US stone fruit industry value — Plum Pox context)",
+      "OTA 1993 Harmful Non-Indigenous Species in the US, OTA-F-565 (ROI per dollar)"
+    ]
+  },
+  "sector_vulnerability": [
+    {
+      "sector": "Citrus",
+      "key_pests": "HLB (citrus greening), Citrus Canker, Citrus Black Spot",
+      "damage_per_year": "~$1B",
+      "states_at_risk": "FL, CA, TX, AZ",
+      "risk_level": "CRITICAL",
+      "color": "#ef4444",
+      "source": "USDA ERS Fruit and Tree Nuts Outlook 2024 · FDACS Annual Report 2024"
+    },
+    {
+      "sector": "Hardwood Forestry",
+      "key_pests": "EAB, Asian Longhorned Beetle, Hemlock Woolly Adelgid, Sudden Oak Death",
+      "damage_per_year": "~$3-4B",
+      "states_at_risk": "38 states",
+      "risk_level": "CRITICAL",
+      "color": "#ef4444",
+      "source": "USDA Forest Service Forest Health Protection Annual Report 2022"
+    },
+    {
+      "sector": "Soybeans",
+      "key_pests": "Soybean Cyst Nematode, Asian Soybean Rust, Soybean Aphid, Kudzu Bug",
+      "damage_per_year": "~$2.9B",
+      "states_at_risk": "Midwest, Southeast",
+      "risk_level": "HIGH",
+      "color": "#f97316",
+      "source": "Bandara et al. 2025 Plant Dis. (avg. 2020-2024 soybean disease losses)"
+    },
+    {
+      "sector": "Wheat & Grains",
+      "key_pests": "Ug99 Stem Rust, Hessian Fly, Stripe Rust",
+      "damage_per_year": "~$725M",
+      "states_at_risk": "Great Plains, Pacific NW",
+      "risk_level": "HIGH",
+      "color": "#f97316",
+      "source": "USDA ERS Wheat Outlook 2024 · Wiersma et al. 2024 Crop Sci."
+    },
+    {
+      "sector": "Nursery & Horticulture",
+      "key_pests": "Spotted Lanternfly, Brown Marmorated Stink Bug, Box Tree Moth",
+      "damage_per_year": "~$300M+",
+      "states_at_risk": "Mid-Atlantic, Northeast",
+      "risk_level": "MODERATE",
+      "color": "#EEB638",
+      "source": "Harper et al. 2019 Penn State Extension · SLF PA worst-case scenario — multi-state sector total higher"
+    },
+    {
+      "sector": "Pollinators / Apiculture",
+      "key_pests": "Varroa mites, Small Hive Beetle, Nosema spp.",
+      "damage_per_year": ">$600M",
+      "states_at_risk": "Nationwide",
+      "risk_level": "HIGH",
+      "color": "#f97316",
+      "source": "Bee Informed Partnership Colony Loss Survey 2024-25 · USDA NASS Honey Bee Colony Loss Report 2025"
+    }
+  ],
+  "threat_intel": {
+    "Wheat Blast": {
+      "risk": "CRITICAL",
+      "pathway": "Contaminated seed / wind dispersal",
+      "if_established": "$3B-$10B/yr wheat losses (CIMMYT 2022)",
+      "source": "Cruz et al. 2016 Science 352:730-733 · CIMMYT Wheat Blast Alert 2022",
+      "color": "#ef4444"
+    },
+    "Wheat Stem Rust Ug99": {
+      "risk": "CRITICAL",
+      "pathway": "Wind-borne urediniospores from East Africa",
+      "if_established": "$1.5B-$3B/yr — affects ~84% of US hard red spring wheat varieties (USDA ARS 2024); susceptibility reduced from ~90% through BGRI/CIMMYT resistance breeding programs",
+      "source": "Singh et al. 2008 Science 320:730 · Figueroa et al. 2024 Mol. Plant · BGRI 2024",
+      "color": "#ef4444"
+    },
+    "Wheat Stem Rust Race Ug99": {
+      "risk": "CRITICAL",
+      "pathway": "Wind-borne urediniospores from East Africa",
+      "if_established": "$1.5B-$3B/yr — affects ~84% of US hard red spring wheat varieties (USDA ARS 2024); susceptibility reduced from ~90% through BGRI/CIMMYT resistance breeding programs",
+      "source": "Singh et al. 2008 Science 320:730 · Figueroa et al. 2024 Mol. Plant · BGRI 2024",
+      "color": "#ef4444"
+    },
+    "Tropilaelaps Mite": {
+      "risk": "HIGH",
+      "pathway": "Imported honey bee packages / queens",
+      "if_established": "$500M-$1B/yr pollination services at risk",
+      "source": "Anderson & Morgan 2007 Exp. Appl. Acarol. 43:171-193",
+      "color": "#f97316"
+    },
+    "Citrus Black Spot": {
+      "risk": "HIGH",
+      "pathway": "Imported citrus fruit / nursery stock",
+      "if_established": "$1.2B+ CA citrus at risk",
+      "source": "USDA APHIS Regulatory Impact Analysis 2015",
+      "color": "#f97316"
+    }
+  }
+}
