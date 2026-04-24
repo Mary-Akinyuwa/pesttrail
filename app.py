@@ -29,22 +29,37 @@ def _ga4_pageview():
             st.session_state["ga4_client_id"] = client_id
             session_id = str(abs(hash(client_id)) % 1_000_000_000)
             # Capture real visitor IP for GA4 geo-resolution
-            # (Measurement Protocol sends from server IP otherwise — map stays blank)
-            # Streamlit Cloud uses Cloudflare — CF-Connecting-IP is the most reliable single-IP header
+            # Private/internal IPs (192.168.x, 10.x, 172.16-31.x, 127.x) are skipped —
+            # they can't be geo-resolved and come from Streamlit/Cloudflare internal infra.
+            def _is_private(ip):
+                try:
+                    parts = [int(x) for x in ip.split(".")]
+                    if len(parts) != 4: return True
+                    return (parts[0] == 10 or parts[0] == 127 or
+                            (parts[0] == 172 and 16 <= parts[1] <= 31) or
+                            (parts[0] == 192 and parts[1] == 168))
+                except Exception:
+                    return True
+
             client_ip = ""
             try:
                 hdrs = st.context.headers
-                for _h in [
-                    "CF-Connecting-IP", "cf-connecting-ip",
-                    "X-Forwarded-For", "x-forwarded-for",
-                    "True-Client-IP", "true-client-ip",
-                    "X-Real-Ip", "x-real-ip",
-                ]:
+                # Check all IPs in each header, skip private ones
+                for _h in ["CF-Connecting-IP", "cf-connecting-ip",
+                           "X-Forwarded-For", "x-forwarded-for",
+                           "True-Client-IP", "true-client-ip",
+                           "X-Real-Ip", "x-real-ip"]:
                     _v = hdrs.get(_h, "")
-                    if _v:
-                        client_ip = _v.split(",")[0].strip()
+                    if not _v:
+                        continue
+                    for _candidate in _v.split(","):
+                        _candidate = _candidate.strip()
+                        if _candidate and not _is_private(_candidate):
+                            client_ip = _candidate
+                            break
+                    if client_ip:
                         break
-                st.session_state["_dbg_ip_header"] = client_ip or "(not captured)"
+                st.session_state["_dbg_ip_header"] = client_ip or "(private/internal IP — geo not available)"
             except Exception:
                 pass
             payload = {

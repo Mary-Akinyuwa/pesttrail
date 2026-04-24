@@ -39,22 +39,38 @@ if not st.session_state.admin_authenticated:
     st.stop()
 
 # --- GA4 geo tracking diagnostic ---
+def _is_private(ip):
+    try:
+        parts = [int(x) for x in ip.split(".")]
+        if len(parts) != 4: return True
+        return (parts[0] == 10 or parts[0] == 127 or
+                (parts[0] == 172 and 16 <= parts[1] <= 31) or
+                (parts[0] == 192 and parts[1] == 168))
+    except Exception:
+        return True
+
 _client_ip = ""
 try:
     hdrs = st.context.headers
     for _h in ["CF-Connecting-IP", "cf-connecting-ip", "X-Forwarded-For",
                 "x-forwarded-for", "True-Client-IP", "X-Real-Ip"]:
         _v = hdrs.get(_h, "")
-        if _v:
-            _client_ip = _v.split(",")[0].strip()
+        if not _v:
+            continue
+        for _c in _v.split(","):
+            _c = _c.strip()
+            if _c and not _is_private(_c):
+                _client_ip = _c
+                break
+        if _client_ip:
             break
 except Exception:
     pass
 
 if _client_ip:
-    st.success(f"✅ **Geo tracking ON** — visitor IP captured: `{_client_ip}` · Countries will appear in GA4 map")
+    st.success(f"✅ **Geo tracking ON** — public IP captured: `{_client_ip}` · Countries will appear in GA4 map")
 else:
-    st.warning("⚠️ **Geo tracking uncertain** — IP not captured from headers · GA4 map may not show countries")
+    st.warning("⚠️ **Geo tracking OFF** — only private/internal IPs found · GA4 map will not show countries · Streamlit Cloud may not forward real visitor IPs")
 
 # --- Data source indicator ---
 _using_supabase = bool(_SB_URL and _SB_KEY)
