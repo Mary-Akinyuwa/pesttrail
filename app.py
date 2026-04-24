@@ -1,5 +1,6 @@
 import streamlit as st
 import streamlit.components.v1 as components
+import streamlit_analytics2 as streamlit_analytics
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
@@ -15,17 +16,7 @@ st.set_page_config(
     layout="wide"
 )
 
-# Google Analytics 4 — injected into main page (not iframe)
-st.markdown("""
-<!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-9MKGHB8W6R"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-  gtag('config', 'G-9MKGHB8W6R');
-</script>
-""", unsafe_allow_html=True)
+streamlit_analytics.start_tracking(firestore_key_file=None, firestore_collection_name=None)
 
 # ══════════════════════════════════════════════════════════════════════════════
 # CUSTOM CSS  — Oswald headings · Roboto body · STELLA/FAO/Corteva aesthetic
@@ -72,6 +63,8 @@ section[data-testid="stSidebar"] {
 [data-testid="stSidebarResizeHandle"] { display: none !important; }
 [data-testid="stSidebarNav"] { display: none !important; }
 [data-testid="stToolbar"] { display: none !important; }
+[data-testid="stSidebarCollapsedControl"] { display: none !important; }
+[data-testid="stSidebarCollapseButton"] { display: none !important; }
 header[data-testid="stHeader"] { display: none !important; }
 section[data-testid="stSidebar"] > div {
     padding-top: 1.5rem;
@@ -2042,3 +2035,5 @@ st.markdown("""
   <a href="https://github.com/Mary-Akinyuwa/lifescience-servicenow-workflows">LifeScience ServiceNow</a>
 </div>
 """, unsafe_allow_html=True)
+
+streamlit_analytics.stop_tracking()
