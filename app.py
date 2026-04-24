@@ -1637,8 +1637,7 @@ f'</div>', unsafe_allow_html=True)
 'padding:12px 18px;font-size:1.125rem;color:#64748b;margin-top:4px;">'
 '📊 <strong>Figures verified by PestTrail AI Agent</strong> · '
 'Most recent available estimate used per pest · '
-'Sources: USDA ERS, USFS, APHIS official reports, peer-reviewed literature · '
-'See full source list and confidence ratings in <em>PestTrail_Economic_Impact_Review_[DATE].docx</em> on Desktop'
+'Sources: USDA ERS, USFS, APHIS official reports, peer-reviewed literature'
 '</div>', unsafe_allow_html=True)
 
     else:
