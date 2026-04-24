@@ -28,33 +28,44 @@ components.html("""
 </script>
 <script>
 (function() {
-  var HIDE = [
+  var SEL = [
     '[data-testid="stStatusWidget"]',
     '[data-testid="stToolbar"]',
     '[data-testid="stToolbarActions"]',
     '[data-testid="stDecoration"]',
     '[data-testid="manage-app-button"]',
     '[class*="viewerBadge"]',
+    '[class*="ViewerBadge"]',
     '[class*="ProfileImage"]',
     '[class*="profile-image"]',
     '[class*="stDeployButton"]',
+    '[class*="deployButton"]',
     '#MainMenu',
     'footer'
-  ];
-  function hide() {
-    try {
-      var doc = window.parent.document;
-      HIDE.forEach(function(sel) {
-        doc.querySelectorAll(sel).forEach(function(el) {
-          el.style.cssText = 'display:none!important;visibility:hidden!important;height:0!important;overflow:hidden!important;';
+  ].join(',');
+  try {
+    var pdoc = window.parent.document;
+    /* Inject a <style> into parent <head> so it covers future elements */
+    if (!pdoc.getElementById('pt-hide-badge')) {
+      var s = pdoc.createElement('style');
+      s.id = 'pt-hide-badge';
+      s.textContent = SEL + '{display:none!important;visibility:hidden!important;height:0!important;overflow:hidden!important;}';
+      pdoc.head.appendChild(s);
+    }
+    /* Also forcibly hide any already-present elements */
+    function hideNow() {
+      try {
+        pdoc.querySelectorAll(SEL).forEach(function(el) {
+          el.style.setProperty('display', 'none', 'important');
+          el.style.setProperty('visibility', 'hidden', 'important');
+          el.style.setProperty('height', '0', 'important');
         });
-      });
-    } catch(e) {}
-  }
-  hide();
-  setTimeout(hide, 500);
-  setTimeout(hide, 2000);
-  setTimeout(hide, 5000);
+      } catch(e) {}
+    }
+    hideNow();
+    /* Watch for anything Streamlit Cloud mounts after page load */
+    new MutationObserver(hideNow).observe(pdoc.body, {childList: true, subtree: true});
+  } catch(e) {}
 })();
 </script>
 """, height=0)
