@@ -618,14 +618,23 @@ div[data-testid="stTabContent"] {
     padding: 32px 32px 40px 32px !important;
     box-shadow: 0 6px 24px rgba(7,51,78,0.08) !important;
 }
-/* Hide Streamlit Cloud deployer avatar and manage-app button */
+/* Hide Streamlit Cloud deployer avatar, profile photo, and manage-app button */
 [data-testid="stStatusWidget"] { display: none !important; }
 [data-testid="stToolbar"] { display: none !important; }
+[data-testid="stToolbarActions"] { display: none !important; }
+[data-testid="stDecoration"] { display: none !important; }
+[data-testid="manage-app-button"] { display: none !important; }
 .viewerBadge_container__r5tak,
 .viewerBadge_link__qRIco,
 [class*="viewerBadge"] { display: none !important; }
+[class*="ProfileImage"] { display: none !important; }
+[class*="profile-image"] { display: none !important; }
+[class*="avatar"] { display: none !important; }
+button[title="Manage app"] { display: none !important; }
+button[aria-label="Manage app"] { display: none !important; }
 #MainMenu { visibility: hidden !important; }
-footer, footer * { visibility: hidden !important; height: 0 !important; }
+footer { visibility: hidden !important; height: 0 !important; overflow: hidden !important; }
+footer * { visibility: hidden !important; height: 0 !important; }
 button[kind="header"] { display: none !important; }
 </style>
 """
@@ -1749,7 +1758,12 @@ f'</div>', unsafe_allow_html=True)
             ), axis=1
         )
         top_econ["mobile_label"] = top_econ.apply(
-            lambda r: f"${r['_val_billions']:.1f}B{r['year_label']}", axis=1
+            lambda r: (
+                f"${r['_val_billions']:.1f}B{r['year_label']}"
+                + (" · cum" if r["_is_cumulative"] and not r["_is_potential"] else "")
+                + (" · erad" if r["_is_eradication_cost"] and not r["_is_potential"] else "")
+                + (" · pre-15" if r["_is_old"] and not r["_is_potential"] and not r["_is_cumulative"] and not r["_is_eradication_cost"] else "")
+            ), axis=1
         )
         row_h  = 38
         height = max(380, len(top_econ) * row_h + 140)
