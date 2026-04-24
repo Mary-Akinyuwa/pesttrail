@@ -16,7 +16,10 @@ st.set_page_config(
     layout="wide"
 )
 
-streamlit_analytics.start_tracking(firestore_key_file=None, firestore_collection_name=None)
+streamlit_analytics.start_tracking()
+
+# Mobile viewport
+st.markdown('<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">', unsafe_allow_html=True)
 
 # ══════════════════════════════════════════════════════════════════════════════
 # CUSTOM CSS  — Oswald headings · Roboto body · STELLA/FAO/Corteva aesthetic
@@ -2036,4 +2039,4 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-streamlit_analytics.stop_tracking()
+streamlit_analytics.stop_tracking(unsafe_password="PestTrail2026!")
