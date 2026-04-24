@@ -1786,7 +1786,7 @@ f'</div>', unsafe_allow_html=True)
                 )
             ))
         x_max = top_econ["_val_billions"].max() if not top_econ.empty else 1
-        _econ_r = 100 if is_mobile else 120
+        _econ_r = 10 if is_mobile else 120
         _econ_b = 20 if is_mobile else _econ_leg_b
         fig.update_layout(
             height=height, showlegend=False,
@@ -1794,7 +1794,7 @@ f'</div>', unsafe_allow_html=True)
             **BASE
         )
         fig.update_xaxes(showgrid=True, gridcolor="#e2e8f0",
-                         range=[-0.5, x_max * (1.8 if is_mobile else 1.55)],
+                         range=[-0.5, x_max * (3.2 if is_mobile else 1.55)],
                          showticklabels=True, ticks="outside",
                          title_text="USD Billions — annual unless labeled cumulative", **TICK)
         fig.update_yaxes(showgrid=False, automargin=True,
@@ -2045,7 +2045,7 @@ with tab_detect:
                     hovertemplate=f"<b>{r['pest_common_name']}</b><br>Lag: {int(r['detection_lag_years'])} yrs<br>Type: {pt}<extra></extra>"
                 ))
             x_max = lag_df["detection_lag_years"].max()
-            _lag_r = 90 if is_mobile else 60
+            _lag_r = 10 if is_mobile else 60
             _lag_b = 20 if is_mobile else _lag_leg_b
             fig.update_layout(
                 height=adj_h, showlegend=False,
@@ -2053,7 +2053,7 @@ with tab_detect:
                 **BASE
             )
             fig.update_xaxes(showgrid=True, gridcolor="#e2e8f0", gridwidth=1,
-                             range=[-0.3, x_max * (1.5 if is_mobile else 1.3)],
+                             range=[-0.3, x_max * (2.8 if is_mobile else 1.3)],
                              showticklabels=True, ticks="outside",
                              title_text="Detection Lag (years)", **TICK)
             fig.update_yaxes(showgrid=False, automargin=True,
