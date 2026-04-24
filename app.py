@@ -1282,7 +1282,7 @@ with tab_erad:
     f'<div style="background:#ffffff;border-radius:8px;padding:24px 20px;'
     f'box-shadow:0 2px 12px rgba(7,51,78,0.08);border-top:4px solid {color};'
     f'text-align:center;margin-bottom:8px;'
-    f'min-height:200px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;">'
+    f'min-height:260px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;">'
     f'<div style="font-size:1.6rem;line-height:1;">{emoji}</div>'
     f'<div style="font-family:Oswald,sans-serif;font-size:2.4rem;font-weight:700;color:{color};line-height:1.1;">{val}</div>'
     f'<div style="font-size:1.0rem;font-weight:700;color:#374151;text-transform:uppercase;letter-spacing:0.08em;margin-top:6px;">{label}</div>'
