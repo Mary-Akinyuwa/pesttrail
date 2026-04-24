@@ -77,9 +77,7 @@ h1, h2, h3, h4, h5 {
 
 /* ── Streamlit main container ──────────────────────────────────── */
 .main .block-container {
-    padding-top: 0 !important;
-    padding-left: 1rem !important;
-    padding-right: 1rem !important;
+    padding: 0 !important;
     max-width: 100% !important;
 }
 
@@ -536,7 +534,7 @@ st.markdown(CUSTOM_CSS, unsafe_allow_html=True)
 # ══════════════════════════════════════════════════════════════════════════════
 def make_hero(n_records: int) -> str:
     return f"""
-<div style="width:calc(100% + 2rem);margin-left:-1rem;margin-right:-1rem;margin-bottom:0;margin-top:-4rem;">
+<div style="width:100%;margin:0;padding:0;">
 <svg viewBox="0 0 1200 340" xmlns="http://www.w3.org/2000/svg"
      style="width:100%;display:block;border-radius:0 0 14px 14px;">
   <defs>
@@ -936,6 +934,7 @@ if selected_status != "All": filtered = filtered[filtered["eradication_status"] 
 # HERO
 # ══════════════════════════════════════════════════════════════════════════════
 components.html(make_hero(len(df)), height=348, scrolling=False)
+st.markdown('<div style="padding:0 2rem;">', unsafe_allow_html=True)
 
 # ══════════════════════════════════════════════════════════════════════════════
 # SEARCH RESULT DETAIL CARD
