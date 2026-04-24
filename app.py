@@ -108,6 +108,9 @@ section[data-testid="stSidebar"] {
 [data-testid="stSidebarCollapsedControl"] { display: none !important; }
 [data-testid="stSidebarCollapseButton"] { display: none !important; }
 header[data-testid="stHeader"] { display: none !important; }
+button[title="streamlitApp"],
+[aria-label="streamlitApp"],
+[title="streamlitApp"] { display: none !important; }
 
 
 /* ── Mobile ────────────────────────────────────────────────────── */
@@ -585,55 +588,55 @@ def make_hero(n_records: int) -> str:
     </svg>
   </div>
 
-  <!-- Leaf shapes (top right) -->
-  <div class="pt-hero-side" style="position:absolute;top:-18px;right:220px;
+  <!-- Leaf shapes (top right, above detection panel) -->
+  <div class="pt-hero-side" style="position:absolute;top:-18px;right:60px;
     width:90px;height:36px;background:linear-gradient(135deg,#86B233,#4a7c10);
     border-radius:50%;transform:rotate(15deg);opacity:0.25;pointer-events:none;"></div>
-  <div class="pt-hero-side" style="position:absolute;top:16px;right:238px;
+  <div class="pt-hero-side" style="position:absolute;top:16px;right:80px;
     width:60px;height:24px;background:#86B233;border-radius:50%;
     transform:rotate(-20deg);opacity:0.15;pointer-events:none;"></div>
 
-  <!-- Radar / biosurveillance scope -->
-  <div class="pt-hero-side" style="position:absolute;right:32px;top:50%;
+  <!-- Radar / biosurveillance scope — sits between trail and detection map -->
+  <div class="pt-hero-side" style="position:absolute;right:260px;top:50%;
     transform:translateY(-58%);pointer-events:none;">
-    <svg width="160" height="160" viewBox="-80 -80 160 160" xmlns="http://www.w3.org/2000/svg">
-      <circle r="80" fill="#03192b" opacity="0.92" stroke="#86B233" stroke-width="2"/>
-      <circle r="63" fill="none" stroke="#86B233" stroke-width="0.75" opacity="0.35"/>
-      <circle r="46" fill="none" stroke="#86B233" stroke-width="0.75" opacity="0.25"/>
-      <circle r="28" fill="none" stroke="#86B233" stroke-width="0.75" opacity="0.2"/>
-      <line x1="-80" y1="0" x2="-30" y2="0" stroke="#86B233" stroke-width="0.8" opacity="0.4"/>
-      <line x1="30" y1="0" x2="80" y2="0" stroke="#86B233" stroke-width="0.8" opacity="0.4"/>
-      <line x1="0" y1="-80" x2="0" y2="-30" stroke="#86B233" stroke-width="0.8" opacity="0.4"/>
-      <line x1="0" y1="30" x2="0" y2="80" stroke="#86B233" stroke-width="0.8" opacity="0.4"/>
-      <line x1="-80" y1="-4" x2="-80" y2="4" stroke="#86B233" stroke-width="1.5" opacity="0.55"/>
-      <line x1="80" y1="-4" x2="80" y2="4" stroke="#86B233" stroke-width="1.5" opacity="0.55"/>
-      <line x1="-4" y1="-80" x2="4" y2="-80" stroke="#86B233" stroke-width="1.5" opacity="0.55"/>
-      <line x1="-4" y1="80" x2="4" y2="80" stroke="#86B233" stroke-width="1.5" opacity="0.55"/>
-      <line x1="-63" y1="-22" x2="63" y2="-22" stroke="#86B233" stroke-width="1" opacity="0.4" stroke-dasharray="5,4"/>
-      <ellipse cx="0" cy="13" rx="13" ry="20" fill="none" stroke="#d0e8f2" stroke-width="1.5"/>
-      <ellipse cx="0" cy="-11" rx="11" ry="9" fill="none" stroke="#d0e8f2" stroke-width="1.5"/>
-      <circle cx="0" cy="-27" r="8" fill="none" stroke="#d0e8f2" stroke-width="1.5"/>
+    <svg width="140" height="140" viewBox="-70 -70 140 140" xmlns="http://www.w3.org/2000/svg">
+      <circle r="70" fill="#03192b" opacity="0.92" stroke="#86B233" stroke-width="2"/>
+      <circle r="55" fill="none" stroke="#86B233" stroke-width="0.75" opacity="0.35"/>
+      <circle r="40" fill="none" stroke="#86B233" stroke-width="0.75" opacity="0.25"/>
+      <circle r="24" fill="none" stroke="#86B233" stroke-width="0.75" opacity="0.2"/>
+      <line x1="-70" y1="0" x2="-26" y2="0" stroke="#86B233" stroke-width="0.8" opacity="0.4"/>
+      <line x1="26" y1="0" x2="70" y2="0" stroke="#86B233" stroke-width="0.8" opacity="0.4"/>
+      <line x1="0" y1="-70" x2="0" y2="-26" stroke="#86B233" stroke-width="0.8" opacity="0.4"/>
+      <line x1="0" y1="26" x2="0" y2="70" stroke="#86B233" stroke-width="0.8" opacity="0.4"/>
+      <line x1="-70" y1="-4" x2="-70" y2="4" stroke="#86B233" stroke-width="1.5" opacity="0.55"/>
+      <line x1="70" y1="-4" x2="70" y2="4" stroke="#86B233" stroke-width="1.5" opacity="0.55"/>
+      <line x1="-4" y1="-70" x2="4" y2="-70" stroke="#86B233" stroke-width="1.5" opacity="0.55"/>
+      <line x1="-4" y1="70" x2="4" y2="70" stroke="#86B233" stroke-width="1.5" opacity="0.55"/>
+      <line x1="-55" y1="-19" x2="55" y2="-19" stroke="#86B233" stroke-width="1" opacity="0.4" stroke-dasharray="5,4"/>
+      <ellipse cx="0" cy="12" rx="13" ry="19" fill="none" stroke="#d0e8f2" stroke-width="1.5"/>
+      <ellipse cx="0" cy="-10" rx="11" ry="9" fill="none" stroke="#d0e8f2" stroke-width="1.5"/>
+      <circle cx="0" cy="-26" r="8" fill="none" stroke="#d0e8f2" stroke-width="1.5"/>
       <line x1="-10" y1="-3" x2="10" y2="-3" stroke="#d0e8f2" stroke-width="1" opacity="0.55"/>
-      <line x1="0" y1="-3" x2="0" y2="30" stroke="#d0e8f2" stroke-width="1" opacity="0.55"/>
-      <path d="M-4,-34 L-9,-44 L-15,-52 L-18,-60" stroke="#a8c8dc" stroke-width="1.2" fill="none" stroke-linejoin="round"/>
-      <path d="M 4,-34 L  9,-44 L 15,-52 L 18,-60" stroke="#a8c8dc" stroke-width="1.2" fill="none" stroke-linejoin="round"/>
-      <circle cx="-18" cy="-60" r="2.5" fill="#EEB638" opacity="0.9"/>
-      <circle cx="18" cy="-60" r="2.5" fill="#EEB638" opacity="0.9"/>
-      <path d="M-9,-9 L-23,-5 L-38,-13" stroke="#a8c8dc" stroke-width="1.2" fill="none"/>
-      <path d="M 9,-9 L 23,-5 L 38,-13" stroke="#a8c8dc" stroke-width="1.2" fill="none"/>
-      <path d="M-11,4 L-29,4 L-44,15" stroke="#a8c8dc" stroke-width="1.2" fill="none"/>
-      <path d="M 11,4 L 29,4 L 44,15" stroke="#a8c8dc" stroke-width="1.2" fill="none"/>
-      <path d="M-11,19 L-28,25 L-38,38" stroke="#a8c8dc" stroke-width="1.2" fill="none"/>
-      <path d="M 11,19 L 28,25 L 38,38" stroke="#a8c8dc" stroke-width="1.2" fill="none"/>
-      <circle cx="0" cy="13" r="6" fill="none" stroke="#EEB638" stroke-width="1.5" opacity="0.9"/>
-      <circle cx="0" cy="13" r="2" fill="#EEB638" opacity="0.9"/>
-      <line x1="55" y1="55" x2="78" y2="80" stroke="#a8c8dc" stroke-width="8" stroke-linecap="round" opacity="0.3"/>
-      <line x1="55" y1="55" x2="78" y2="80" stroke="#d0e8f2" stroke-width="3" stroke-linecap="round" opacity="0.18"/>
+      <line x1="0" y1="-3" x2="0" y2="29" stroke="#d0e8f2" stroke-width="1" opacity="0.55"/>
+      <path d="M-4,-33 L-9,-43 L-15,-50 L-17,-58" stroke="#a8c8dc" stroke-width="1.2" fill="none" stroke-linejoin="round"/>
+      <path d="M 4,-33 L  9,-43 L 15,-50 L 17,-58" stroke="#a8c8dc" stroke-width="1.2" fill="none" stroke-linejoin="round"/>
+      <circle cx="-17" cy="-58" r="2.5" fill="#EEB638" opacity="0.9"/>
+      <circle cx="17" cy="-58" r="2.5" fill="#EEB638" opacity="0.9"/>
+      <path d="M-9,-8 L-22,-4 L-36,-12" stroke="#a8c8dc" stroke-width="1.2" fill="none"/>
+      <path d="M 9,-8 L 22,-4 L 36,-12" stroke="#a8c8dc" stroke-width="1.2" fill="none"/>
+      <path d="M-11,4 L-28,4 L-42,14" stroke="#a8c8dc" stroke-width="1.2" fill="none"/>
+      <path d="M 11,4 L 28,4 L 42,14" stroke="#a8c8dc" stroke-width="1.2" fill="none"/>
+      <path d="M-11,18 L-27,24 L-36,36" stroke="#a8c8dc" stroke-width="1.2" fill="none"/>
+      <path d="M 11,18 L 27,24 L 36,36" stroke="#a8c8dc" stroke-width="1.2" fill="none"/>
+      <circle cx="0" cy="12" r="6" fill="none" stroke="#EEB638" stroke-width="1.5" opacity="0.9"/>
+      <circle cx="0" cy="12" r="2" fill="#EEB638" opacity="0.9"/>
+      <line x1="48" y1="48" x2="68" y2="68" stroke="#a8c8dc" stroke-width="8" stroke-linecap="round" opacity="0.3"/>
+      <line x1="48" y1="48" x2="68" y2="68" stroke="#d0e8f2" stroke-width="3" stroke-linecap="round" opacity="0.18"/>
     </svg>
   </div>
 
-  <!-- Detection panel: label + dot grid + legend -->
-  <div class="pt-hero-side" style="position:absolute;right:210px;top:50%;
+  <!-- Detection panel: label + dot grid + legend — far right -->
+  <div class="pt-hero-side" style="position:absolute;right:28px;top:50%;
     transform:translateY(-55%);pointer-events:none;opacity:0.85;">
     <svg width="215" height="160" viewBox="0 0 215 160" xmlns="http://www.w3.org/2000/svg">
       <text x="0" y="13" font-family="Oswald,sans-serif" font-size="11" font-weight="600"
@@ -672,16 +675,16 @@ def make_hero(n_records: int) -> str:
     </svg>
   </div>
 
-  <!-- Invasion spread path (mid) -->
-  <div class="pt-hero-side" style="position:absolute;left:44%;top:52%;
-    transform:translateY(-50%);pointer-events:none;opacity:0.42;">
-    <svg width="180" height="70" viewBox="0 0 180 70" xmlns="http://www.w3.org/2000/svg">
-      <path d="M 0 50 Q 60 20 110 38 Q 148 50 152 28"
+  <!-- Invasion spread path — curves from content area toward the radar -->
+  <div class="pt-hero-side" style="position:absolute;left:43%;top:54%;
+    transform:translateY(-50%);pointer-events:none;opacity:0.45;">
+    <svg width="200" height="70" viewBox="0 0 200 70" xmlns="http://www.w3.org/2000/svg">
+      <path d="M 0 52 Q 70 18 130 36 Q 170 48 175 24"
             fill="none" stroke="#86B233" stroke-width="2" stroke-dasharray="8,6"/>
-      <circle cx="65"  cy="26" r="6" fill="#86B233" opacity="0.3"/>
-      <circle cx="65"  cy="26" r="11" fill="none" stroke="#86B233" stroke-width="1.5" opacity="0.2"/>
-      <circle cx="120" cy="38" r="6" fill="#EEB638" opacity="0.5"/>
-      <circle cx="120" cy="38" r="11" fill="none" stroke="#EEB638" stroke-width="1.5" opacity="0.3"/>
+      <circle cx="72"  cy="24" r="6" fill="#86B233" opacity="0.3"/>
+      <circle cx="72"  cy="24" r="11" fill="none" stroke="#86B233" stroke-width="1.5" opacity="0.2"/>
+      <circle cx="138" cy="36" r="6" fill="#EEB638" opacity="0.5"/>
+      <circle cx="138" cy="36" r="11" fill="none" stroke="#EEB638" stroke-width="1.5" opacity="0.3"/>
     </svg>
   </div>
 
