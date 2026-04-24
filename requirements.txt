@@ -4,3 +4,4 @@ plotly>=5.18.0
 anthropic>=0.25.0
 python-dotenv>=1.0.0
 streamlit-analytics2>=0.10.6
+requests>=2.31.0

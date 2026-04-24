@@ -7,6 +7,7 @@ import plotly.graph_objects as go
 import sqlite3
 import uuid
 import hashlib
+import requests as _requests
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -15,6 +16,33 @@ st.set_page_config(
     page_icon="🌿",
     layout="wide"
 )
+
+# ── Server-side GA4 Measurement Protocol ─────────────────────────────────────
+def _ga4_pageview():
+    try:
+        api_secret = st.secrets.get("GA4_API_SECRET", "")
+        if not api_secret:
+            return
+        if "ga4_sent" not in st.session_state:
+            st.session_state["ga4_sent"] = True
+            client_id = st.session_state.get("ga4_client_id", str(uuid.uuid4()))
+            st.session_state["ga4_client_id"] = client_id
+            _requests.post(
+                f"https://www.google-analytics.com/mp/collect"
+                f"?measurement_id=G-9MKGHB8W6R&api_secret={api_secret}",
+                json={
+                    "client_id": client_id,
+                    "events": [{"name": "page_view", "params": {
+                        "page_title": "PestTrail",
+                        "page_location": "https://pesttrail.streamlit.app"
+                    }}]
+                },
+                timeout=2
+            )
+    except Exception:
+        pass
+
+_ga4_pageview()
 
 streamlit_analytics.start_tracking()
 
