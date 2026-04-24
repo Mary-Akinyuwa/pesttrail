@@ -535,123 +535,168 @@ st.markdown(CUSTOM_CSS, unsafe_allow_html=True)
 def make_hero(n_records: int) -> str:
     return f"""
 <style>
-.pt-hero-side {{ display: block; }}
-@media (max-width: 860px) {{ .pt-hero-side {{ display: none !important; }} }}
+.pt-hero-side {{ display:block; }}
+@media (max-width:860px) {{ .pt-hero-side {{ display:none !important; }} }}
 </style>
 <div style="
-  width:100%;padding:48px 52px 44px 52px;
+  width:100%;min-height:340px;
+  padding:56px 52px 80px 52px;
   background:linear-gradient(135deg,#04243a 0%,#07334E 60%,#0d4a2e 100%);
   border-radius:0 0 14px 14px;box-sizing:border-box;
   position:relative;overflow:hidden;">
 
-  <!-- Field strip bottom decoration -->
-  <div style="position:absolute;bottom:0;left:0;right:0;height:20px;
-    background:linear-gradient(to top,#0a2018 0%,#0d2b1e 100%);opacity:0.75;"></div>
+  <!-- Subtle grid lines -->
+  <div class="pt-hero-side" style="position:absolute;inset:0;pointer-events:none;opacity:0.04;">
+    <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+      <line x1="0" y1="25%" x2="100%" y2="25%" stroke="#fff" stroke-width="0.5"/>
+      <line x1="0" y1="50%" x2="100%" y2="50%" stroke="#fff" stroke-width="0.5"/>
+      <line x1="0" y1="75%" x2="100%" y2="75%" stroke="#fff" stroke-width="0.5"/>
+      <line x1="25%" y1="0" x2="25%" y2="100%" stroke="#fff" stroke-width="0.5"/>
+      <line x1="50%" y1="0" x2="50%" y2="100%" stroke="#fff" stroke-width="0.5"/>
+      <line x1="75%" y1="0" x2="75%" y2="100%" stroke="#fff" stroke-width="0.5"/>
+    </svg>
+  </div>
 
-  <!-- Leaf shapes top-right -->
-  <div class="pt-hero-side" style="position:absolute;top:-16px;right:210px;
+  <!-- Ambient glow spots -->
+  <div style="position:absolute;bottom:30px;left:80px;width:240px;height:80px;
+    background:radial-gradient(ellipse,#86B233 0%,transparent 70%);
+    opacity:0.07;pointer-events:none;border-radius:50%;"></div>
+  <div class="pt-hero-side" style="position:absolute;bottom:20px;right:200px;width:280px;height:90px;
+    background:radial-gradient(ellipse,#116AAB 0%,transparent 70%);
+    opacity:0.07;pointer-events:none;border-radius:50%;"></div>
+
+  <!-- Crop stalk silhouettes (bottom) -->
+  <div style="position:absolute;bottom:18px;left:0;right:0;pointer-events:none;">
+    <svg width="100%" height="70" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
+      <!-- Left stalk group -->
+      <g opacity="0.45" fill="#1b4332">
+        <rect x="2%"  y="20" width="3" height="50"/><ellipse cx="2.2%"  cy="18" rx="5"  ry="14" fill="#2d6a4f"/>
+        <rect x="3.5%" y="28" width="3" height="42"/><ellipse cx="3.7%"  cy="26" rx="4"  ry="11" fill="#2d6a4f"/>
+        <rect x="5%"  y="22" width="3" height="48"/><ellipse cx="5.2%"  cy="20" rx="5"  ry="13" fill="#2d6a4f"/>
+        <rect x="6.5%" y="30" width="3" height="40"/><ellipse cx="6.7%"  cy="28" rx="4"  ry="10" fill="#2d6a4f"/>
+        <rect x="8%"  y="24" width="3" height="46"/><ellipse cx="8.2%"  cy="22" rx="5"  ry="12" fill="#2d6a4f"/>
+        <rect x="9.5%" y="32" width="3" height="38"/><ellipse cx="9.7%"  cy="30" rx="4"  ry="10" fill="#2d6a4f"/>
+        <rect x="11%" y="18" width="3" height="52"/><ellipse cx="11.2%" cy="16" rx="6"  ry="15" fill="#2d6a4f"/>
+        <rect x="12.5%" y="26" width="3" height="44"/><ellipse cx="12.7%" cy="24" rx="5" ry="12" fill="#2d6a4f"/>
+      </g>
+      <!-- Ground strip -->
+      <rect x="0" y="48" width="100%" height="22" fill="#0d2b1e" opacity="0.6"/>
+      <rect x="0" y="55" width="100%" height="15" fill="#0a2018" opacity="0.8"/>
+    </svg>
+  </div>
+
+  <!-- Leaf shapes (top right) -->
+  <div class="pt-hero-side" style="position:absolute;top:-18px;right:220px;
     width:90px;height:36px;background:linear-gradient(135deg,#86B233,#4a7c10);
     border-radius:50%;transform:rotate(15deg);opacity:0.25;pointer-events:none;"></div>
-  <div class="pt-hero-side" style="position:absolute;top:18px;right:228px;
+  <div class="pt-hero-side" style="position:absolute;top:16px;right:238px;
     width:60px;height:24px;background:#86B233;border-radius:50%;
     transform:rotate(-20deg);opacity:0.15;pointer-events:none;"></div>
 
-  <!-- Radar / biosurveillance scope (right) -->
-  <div class="pt-hero-side" style="position:absolute;right:36px;top:50%;
-    transform:translateY(-50%);pointer-events:none;">
-    <svg width="152" height="152" viewBox="-76 -76 152 152" xmlns="http://www.w3.org/2000/svg">
-      <circle r="76" fill="#03192b" opacity="0.92" stroke="#86B233" stroke-width="2"/>
-      <circle r="60" fill="none" stroke="#86B233" stroke-width="0.75" opacity="0.35"/>
-      <circle r="44" fill="none" stroke="#86B233" stroke-width="0.75" opacity="0.25"/>
-      <circle r="26" fill="none" stroke="#86B233" stroke-width="0.75" opacity="0.2"/>
-      <line x1="-76" y1="0" x2="-28" y2="0" stroke="#86B233" stroke-width="0.8" opacity="0.4"/>
-      <line x1="28" y1="0" x2="76" y2="0" stroke="#86B233" stroke-width="0.8" opacity="0.4"/>
-      <line x1="0" y1="-76" x2="0" y2="-28" stroke="#86B233" stroke-width="0.8" opacity="0.4"/>
-      <line x1="0" y1="28" x2="0" y2="76" stroke="#86B233" stroke-width="0.8" opacity="0.4"/>
-      <line x1="-76" y1="-4" x2="-76" y2="4" stroke="#86B233" stroke-width="1.5" opacity="0.55"/>
-      <line x1="76" y1="-4" x2="76" y2="4" stroke="#86B233" stroke-width="1.5" opacity="0.55"/>
-      <line x1="-4" y1="-76" x2="4" y2="-76" stroke="#86B233" stroke-width="1.5" opacity="0.55"/>
-      <line x1="-4" y1="76" x2="4" y2="76" stroke="#86B233" stroke-width="1.5" opacity="0.55"/>
-      <line x1="-60" y1="-20" x2="60" y2="-20" stroke="#86B233" stroke-width="1" opacity="0.4" stroke-dasharray="5,4"/>
-      <!-- Insect schematic -->
-      <ellipse cx="0" cy="12" rx="13" ry="19" fill="none" stroke="#d0e8f2" stroke-width="1.5"/>
-      <ellipse cx="0" cy="-10" rx="11" ry="9" fill="none" stroke="#d0e8f2" stroke-width="1.5"/>
-      <circle cx="0" cy="-26" r="8" fill="none" stroke="#d0e8f2" stroke-width="1.5"/>
+  <!-- Radar / biosurveillance scope -->
+  <div class="pt-hero-side" style="position:absolute;right:32px;top:50%;
+    transform:translateY(-58%);pointer-events:none;">
+    <svg width="160" height="160" viewBox="-80 -80 160 160" xmlns="http://www.w3.org/2000/svg">
+      <circle r="80" fill="#03192b" opacity="0.92" stroke="#86B233" stroke-width="2"/>
+      <circle r="63" fill="none" stroke="#86B233" stroke-width="0.75" opacity="0.35"/>
+      <circle r="46" fill="none" stroke="#86B233" stroke-width="0.75" opacity="0.25"/>
+      <circle r="28" fill="none" stroke="#86B233" stroke-width="0.75" opacity="0.2"/>
+      <line x1="-80" y1="0" x2="-30" y2="0" stroke="#86B233" stroke-width="0.8" opacity="0.4"/>
+      <line x1="30" y1="0" x2="80" y2="0" stroke="#86B233" stroke-width="0.8" opacity="0.4"/>
+      <line x1="0" y1="-80" x2="0" y2="-30" stroke="#86B233" stroke-width="0.8" opacity="0.4"/>
+      <line x1="0" y1="30" x2="0" y2="80" stroke="#86B233" stroke-width="0.8" opacity="0.4"/>
+      <line x1="-80" y1="-4" x2="-80" y2="4" stroke="#86B233" stroke-width="1.5" opacity="0.55"/>
+      <line x1="80" y1="-4" x2="80" y2="4" stroke="#86B233" stroke-width="1.5" opacity="0.55"/>
+      <line x1="-4" y1="-80" x2="4" y2="-80" stroke="#86B233" stroke-width="1.5" opacity="0.55"/>
+      <line x1="-4" y1="80" x2="4" y2="80" stroke="#86B233" stroke-width="1.5" opacity="0.55"/>
+      <line x1="-63" y1="-22" x2="63" y2="-22" stroke="#86B233" stroke-width="1" opacity="0.4" stroke-dasharray="5,4"/>
+      <ellipse cx="0" cy="13" rx="13" ry="20" fill="none" stroke="#d0e8f2" stroke-width="1.5"/>
+      <ellipse cx="0" cy="-11" rx="11" ry="9" fill="none" stroke="#d0e8f2" stroke-width="1.5"/>
+      <circle cx="0" cy="-27" r="8" fill="none" stroke="#d0e8f2" stroke-width="1.5"/>
       <line x1="-10" y1="-3" x2="10" y2="-3" stroke="#d0e8f2" stroke-width="1" opacity="0.55"/>
-      <line x1="0" y1="-3" x2="0" y2="29" stroke="#d0e8f2" stroke-width="1" opacity="0.55"/>
-      <path d="M-4,-33 L-9,-43 L-15,-50 L-17,-58" stroke="#a8c8dc" stroke-width="1.2" fill="none" stroke-linejoin="round"/>
-      <path d="M 4,-33 L  9,-43 L 15,-50 L 17,-58" stroke="#a8c8dc" stroke-width="1.2" fill="none" stroke-linejoin="round"/>
-      <circle cx="-17" cy="-58" r="2.5" fill="#EEB638" opacity="0.9"/>
-      <circle cx="17" cy="-58" r="2.5" fill="#EEB638" opacity="0.9"/>
-      <path d="M-9,-8 L-22,-4 L-36,-12" stroke="#a8c8dc" stroke-width="1.2" fill="none"/>
-      <path d="M 9,-8 L 22,-4 L 36,-12" stroke="#a8c8dc" stroke-width="1.2" fill="none"/>
-      <path d="M-11,4 L-28,4 L-42,14" stroke="#a8c8dc" stroke-width="1.2" fill="none"/>
-      <path d="M 11,4 L 28,4 L 42,14" stroke="#a8c8dc" stroke-width="1.2" fill="none"/>
-      <path d="M-11,18 L-27,24 L-36,36" stroke="#a8c8dc" stroke-width="1.2" fill="none"/>
-      <path d="M 11,18 L 27,24 L 36,36" stroke="#a8c8dc" stroke-width="1.2" fill="none"/>
-      <circle cx="0" cy="12" r="6" fill="none" stroke="#EEB638" stroke-width="1.5" opacity="0.9"/>
-      <circle cx="0" cy="12" r="2" fill="#EEB638" opacity="0.9"/>
+      <line x1="0" y1="-3" x2="0" y2="30" stroke="#d0e8f2" stroke-width="1" opacity="0.55"/>
+      <path d="M-4,-34 L-9,-44 L-15,-52 L-18,-60" stroke="#a8c8dc" stroke-width="1.2" fill="none" stroke-linejoin="round"/>
+      <path d="M 4,-34 L  9,-44 L 15,-52 L 18,-60" stroke="#a8c8dc" stroke-width="1.2" fill="none" stroke-linejoin="round"/>
+      <circle cx="-18" cy="-60" r="2.5" fill="#EEB638" opacity="0.9"/>
+      <circle cx="18" cy="-60" r="2.5" fill="#EEB638" opacity="0.9"/>
+      <path d="M-9,-9 L-23,-5 L-38,-13" stroke="#a8c8dc" stroke-width="1.2" fill="none"/>
+      <path d="M 9,-9 L 23,-5 L 38,-13" stroke="#a8c8dc" stroke-width="1.2" fill="none"/>
+      <path d="M-11,4 L-29,4 L-44,15" stroke="#a8c8dc" stroke-width="1.2" fill="none"/>
+      <path d="M 11,4 L 29,4 L 44,15" stroke="#a8c8dc" stroke-width="1.2" fill="none"/>
+      <path d="M-11,19 L-28,25 L-38,38" stroke="#a8c8dc" stroke-width="1.2" fill="none"/>
+      <path d="M 11,19 L 28,25 L 38,38" stroke="#a8c8dc" stroke-width="1.2" fill="none"/>
+      <circle cx="0" cy="13" r="6" fill="none" stroke="#EEB638" stroke-width="1.5" opacity="0.9"/>
+      <circle cx="0" cy="13" r="2" fill="#EEB638" opacity="0.9"/>
+      <line x1="55" y1="55" x2="78" y2="80" stroke="#a8c8dc" stroke-width="8" stroke-linecap="round" opacity="0.3"/>
+      <line x1="55" y1="55" x2="78" y2="80" stroke="#d0e8f2" stroke-width="3" stroke-linecap="round" opacity="0.18"/>
     </svg>
   </div>
 
   <!-- Detection panel: label + dot grid + legend -->
-  <div class="pt-hero-side" style="position:absolute;right:204px;top:50%;
-    transform:translateY(-50%);pointer-events:none;opacity:0.85;">
-    <svg width="210" height="148" viewBox="0 0 210 148" xmlns="http://www.w3.org/2000/svg">
-      <!-- Label -->
+  <div class="pt-hero-side" style="position:absolute;right:210px;top:50%;
+    transform:translateY(-55%);pointer-events:none;opacity:0.85;">
+    <svg width="215" height="160" viewBox="0 0 215 160" xmlns="http://www.w3.org/2000/svg">
       <text x="0" y="13" font-family="Oswald,sans-serif" font-size="11" font-weight="600"
             fill="#86B233" letter-spacing="0.12em" opacity="0.9">DETECTION MAP</text>
-      <!-- Row 1 dots -->
-      <circle cx="10"  cy="32" r="5" fill="#86B233"/><circle cx="10"  cy="32" r="9" fill="none" stroke="#86B233" stroke-width="1" opacity="0.4"/>
-      <circle cx="38"  cy="24" r="4" fill="#86B233" opacity="0.6"/>
-      <circle cx="66"  cy="37" r="6" fill="#EEB638"/><circle cx="66"  cy="37" r="10" fill="none" stroke="#EEB638" stroke-width="1" opacity="0.4"/>
-      <circle cx="94"  cy="27" r="4" fill="#86B233" opacity="0.7"/>
-      <circle cx="122" cy="40" r="5" fill="#86B233"/>
-      <circle cx="152" cy="24" r="6" fill="#116AAB" opacity="0.8"/>
-      <circle cx="180" cy="36" r="4" fill="#86B233" opacity="0.6"/>
-      <!-- Row 2 dots -->
-      <circle cx="18"  cy="64" r="4" fill="#86B233" opacity="0.6"/>
-      <circle cx="48"  cy="57" r="6" fill="#EEB638"/><circle cx="48" cy="57" r="10" fill="none" stroke="#EEB638" stroke-width="1" opacity="0.35"/>
-      <circle cx="76"  cy="70" r="5" fill="#86B233"/>
-      <circle cx="104" cy="60" r="4" fill="#86B233" opacity="0.5"/>
-      <circle cx="132" cy="72" r="6" fill="#116AAB" opacity="0.75"/>
-      <circle cx="160" cy="62" r="5" fill="#86B233" opacity="0.7"/>
-      <circle cx="188" cy="74" r="4" fill="#EEB638" opacity="0.6"/>
+      <!-- Row 1 -->
+      <circle cx="8"   cy="33" r="5" fill="#86B233"/><circle cx="8"   cy="33" r="9" fill="none" stroke="#86B233" stroke-width="1" opacity="0.4"/>
+      <circle cx="36"  cy="25" r="4" fill="#86B233" opacity="0.6"/>
+      <circle cx="64"  cy="38" r="6" fill="#EEB638"/><circle cx="64"  cy="38" r="10" fill="none" stroke="#EEB638" stroke-width="1" opacity="0.4"/>
+      <circle cx="92"  cy="28" r="4" fill="#86B233" opacity="0.7"/>
+      <circle cx="120" cy="41" r="5" fill="#86B233"/>
+      <circle cx="150" cy="25" r="6" fill="#116AAB" opacity="0.8"/>
+      <circle cx="178" cy="37" r="4" fill="#86B233" opacity="0.6"/>
+      <!-- Row 2 -->
+      <circle cx="16"  cy="65" r="4" fill="#86B233" opacity="0.6"/>
+      <circle cx="46"  cy="58" r="6" fill="#EEB638"/><circle cx="46" cy="58" r="10" fill="none" stroke="#EEB638" stroke-width="1" opacity="0.35"/>
+      <circle cx="74"  cy="71" r="5" fill="#86B233"/>
+      <circle cx="102" cy="61" r="4" fill="#86B233" opacity="0.5"/>
+      <circle cx="130" cy="73" r="6" fill="#116AAB" opacity="0.75"/>
+      <circle cx="158" cy="63" r="5" fill="#86B233" opacity="0.7"/>
+      <circle cx="186" cy="75" r="4" fill="#EEB638" opacity="0.6"/>
+      <!-- Row 3 -->
+      <circle cx="22"  cy="97" r="5" fill="#86B233" opacity="0.7"/>
+      <circle cx="52"  cy="90" r="4" fill="#86B233" opacity="0.5"/>
+      <circle cx="80"  cy="103" r="6" fill="#EEB638"/>
+      <circle cx="110" cy="93" r="5" fill="#86B233" opacity="0.6"/>
+      <circle cx="140" cy="105" r="4" fill="#86B233"/>
+      <circle cx="168" cy="95" r="6" fill="#116AAB" opacity="0.8"/>
+      <circle cx="196" cy="107" r="4" fill="#86B233" opacity="0.6"/>
       <!-- Legend -->
-      <circle cx="6"   cy="106" r="5" fill="#86B233"/>
-      <text x="16" y="111" font-family="Roboto,sans-serif" font-size="11" fill="#a8c8dc">Established</text>
-      <circle cx="100" cy="106" r="5" fill="#EEB638"/>
-      <text x="110" y="111" font-family="Roboto,sans-serif" font-size="11" fill="#a8c8dc">Active Spread</text>
-      <circle cx="6"   cy="128" r="5" fill="#116AAB"/>
-      <text x="16" y="133" font-family="Roboto,sans-serif" font-size="11" fill="#a8c8dc">New Detection</text>
+      <circle cx="6"   cy="133" r="5" fill="#86B233"/>
+      <text x="16" y="138" font-family="Roboto,sans-serif" font-size="11" fill="#a8c8dc">Established</text>
+      <circle cx="105" cy="133" r="5" fill="#EEB638"/>
+      <text x="115" y="138" font-family="Roboto,sans-serif" font-size="11" fill="#a8c8dc">Active Spread</text>
+      <circle cx="6"   cy="153" r="5" fill="#116AAB"/>
+      <text x="16" y="158" font-family="Roboto,sans-serif" font-size="11" fill="#a8c8dc">New Detection</text>
     </svg>
   </div>
 
-  <!-- Invasion spread path -->
-  <div class="pt-hero-side" style="position:absolute;left:620px;top:55%;
-    transform:translateY(-50%);pointer-events:none;opacity:0.45;">
-    <svg width="200" height="60" viewBox="0 0 200 60" xmlns="http://www.w3.org/2000/svg">
-      <path d="M 0 40 Q 60 10 120 30 Q 155 42 160 20"
+  <!-- Invasion spread path (mid) -->
+  <div class="pt-hero-side" style="position:absolute;left:44%;top:52%;
+    transform:translateY(-50%);pointer-events:none;opacity:0.42;">
+    <svg width="180" height="70" viewBox="0 0 180 70" xmlns="http://www.w3.org/2000/svg">
+      <path d="M 0 50 Q 60 20 110 38 Q 148 50 152 28"
             fill="none" stroke="#86B233" stroke-width="2" stroke-dasharray="8,6"/>
-      <circle cx="70"  cy="22" r="6" fill="#86B233" opacity="0.3"/>
-      <circle cx="70"  cy="22" r="11" fill="none" stroke="#86B233" stroke-width="1.5" opacity="0.2"/>
-      <circle cx="130" cy="32" r="6" fill="#EEB638" opacity="0.5"/>
-      <circle cx="130" cy="32" r="11" fill="none" stroke="#EEB638" stroke-width="1.5" opacity="0.3"/>
+      <circle cx="65"  cy="26" r="6" fill="#86B233" opacity="0.3"/>
+      <circle cx="65"  cy="26" r="11" fill="none" stroke="#86B233" stroke-width="1.5" opacity="0.2"/>
+      <circle cx="120" cy="38" r="6" fill="#EEB638" opacity="0.5"/>
+      <circle cx="120" cy="38" r="11" fill="none" stroke="#EEB638" stroke-width="1.5" opacity="0.3"/>
     </svg>
   </div>
 
   <!-- Main left content -->
-  <div style="position:relative;z-index:1;max-width:640px;">
-    <div style="font-family:'Oswald',sans-serif;font-size:4.5rem;font-weight:700;
-      line-height:1;letter-spacing:0.04em;">
-      <span style="color:#ffffff;">PEST</span><span style="color:#86B233;">TRAIL</span>
+  <div style="position:relative;z-index:1;max-width:600px;">
+    <div style="font-family:'Oswald',sans-serif;font-weight:700;
+      line-height:1;letter-spacing:0.04em;margin-bottom:0;">
+      <span style="font-size:4.8rem;color:#ffffff;">PEST</span><span style="font-size:3.4rem;color:#86B233;">TRAIL</span>
     </div>
     <div style="width:280px;height:4px;background:#86B233;border-radius:2px;margin:10px 0 16px 0;"></div>
     <div style="font-family:'Roboto',sans-serif;font-size:1rem;font-weight:300;
       color:#a8c8dc;letter-spacing:0.02em;margin-bottom:6px;">
       US Invasive Pest &amp; Pathogen Intelligence Platform
     </div>
-    <div style="font-family:'Roboto',sans-serif;font-size:0.8rem;color:#6a9aaf;margin-bottom:24px;">
+    <div style="font-family:'Roboto',sans-serif;font-size:0.8rem;color:#6a9aaf;margin-bottom:26px;">
       Tracking pests &middot; pathogens &middot; inocula introduced since 1995
     </div>
     <div style="display:flex;gap:10px;flex-wrap:wrap;">
