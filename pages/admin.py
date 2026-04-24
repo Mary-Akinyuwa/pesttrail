@@ -3,6 +3,7 @@ import sqlite3
 import pandas as pd
 import plotly.express as px
 import os
+import requests as _req
 from pathlib import Path
 from dotenv import load_dotenv
 
@@ -14,13 +15,15 @@ st.set_page_config(
     layout="wide"
 )
 
-DB_PATH = Path(__file__).parent.parent / "analytics" / "visits.db"
+DB_PATH  = Path(__file__).parent.parent / "analytics" / "visits.db"
+_SB_URL  = st.secrets.get("SUPABASE_URL", "") if hasattr(st, "secrets") else ""
+_SB_KEY  = st.secrets.get("SUPABASE_ANON_KEY", "") if hasattr(st, "secrets") else ""
 
 # --- Auth gate ---
 st.title("🔒 PestTrail Admin")
 st.caption("Visitor analytics — private access only")
 
-admin_pw = os.getenv("ADMIN_PASSWORD", "changeme")
+admin_pw = st.secrets.get("ADMIN_PASSWORD", os.getenv("ADMIN_PASSWORD", "changeme")) if hasattr(st, "secrets") else os.getenv("ADMIN_PASSWORD", "changeme")
 
 if "admin_authenticated" not in st.session_state:
     st.session_state.admin_authenticated = False
@@ -35,12 +38,43 @@ if not st.session_state.admin_authenticated:
             st.error("Incorrect password.")
     st.stop()
 
-# --- GA4 IP capture diagnostic (shows what IP is being sent to GA4 for your own session) ---
-_dbg_ip = st.session_state.get("_dbg_ip_header", "(visit main page first)")
-st.info(f"🔍 **GA4 IP sent for your session:** `{_dbg_ip}` — if this shows a real IP (not blank/not-captured), geo tracking is working.")
+# --- GA4 geo tracking diagnostic ---
+_client_ip = ""
+try:
+    hdrs = st.context.headers
+    for _h in ["CF-Connecting-IP", "cf-connecting-ip", "X-Forwarded-For",
+                "x-forwarded-for", "True-Client-IP", "X-Real-Ip"]:
+        _v = hdrs.get(_h, "")
+        if _v:
+            _client_ip = _v.split(",")[0].strip()
+            break
+except Exception:
+    pass
+
+if _client_ip:
+    st.success(f"✅ **Geo tracking ON** — visitor IP captured: `{_client_ip}` · Countries will appear in GA4 map")
+else:
+    st.warning("⚠️ **Geo tracking uncertain** — IP not captured from headers · GA4 map may not show countries")
+
+# --- Data source indicator ---
+_using_supabase = bool(_SB_URL and _SB_KEY)
+st.caption(f"📦 Data source: {'☁️ Supabase (persistent)' if _using_supabase else '💾 Local SQLite (resets on redeploy — set SUPABASE_URL + SUPABASE_ANON_KEY in Streamlit Secrets to persist)'}")
 
 # --- Load analytics data ---
 def load_visits():
+    if _using_supabase:
+        try:
+            resp = _req.get(
+                f"{_SB_URL}/rest/v1/visits?select=*&order=timestamp.desc&limit=10000",
+                headers={"apikey": _SB_KEY, "Authorization": f"Bearer {_SB_KEY}"},
+                timeout=5
+            )
+            if resp.ok:
+                data = resp.json()
+                return pd.DataFrame(data) if data else pd.DataFrame()
+        except Exception:
+            pass
+    # Fallback to local SQLite
     if not DB_PATH.exists():
         return pd.DataFrame()
     conn = sqlite3.connect(DB_PATH)

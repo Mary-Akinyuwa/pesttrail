@@ -884,20 +884,38 @@ def init_db():
     """)
     conn.commit(); conn.close()
 
+_SB_URL = st.secrets.get("SUPABASE_URL", "") if hasattr(st, "secrets") else ""
+_SB_KEY = st.secrets.get("SUPABASE_ANON_KEY", "") if hasattr(st, "secrets") else ""
+
 def log_visit(session_id, search_term, pest_type, origin_region, entry_mode, impact_sector):
+    row = {
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "session_id": session_id,
+        "search_term": search_term or "",
+        "filter_pest_type": pest_type if pest_type != "All" else "",
+        "filter_origin_region": origin_region if origin_region != "All" else "",
+        "filter_entry_mode": entry_mode if entry_mode != "All" else "",
+        "filter_impact_sector": impact_sector if impact_sector != "All" else "",
+    }
+    # Write to Supabase (persistent across redeploys)
+    if _SB_URL and _SB_KEY:
+        try:
+            _requests.post(
+                f"{_SB_URL}/rest/v1/visits",
+                headers={"apikey": _SB_KEY, "Authorization": f"Bearer {_SB_KEY}",
+                         "Content-Type": "application/json", "Prefer": "return=minimal"},
+                json=row, timeout=3
+            )
+        except Exception:
+            pass
+    # Always also write to local SQLite (for local dev / fallback)
     try:
         conn = sqlite3.connect(DB_PATH)
         conn.execute("""
             INSERT INTO visits
             (timestamp,session_id,search_term,filter_pest_type,filter_origin_region,filter_entry_mode,filter_impact_sector)
             VALUES (?,?,?,?,?,?,?)
-        """, (
-            datetime.now(timezone.utc).isoformat(), session_id, search_term or "",
-            pest_type if pest_type != "All" else "",
-            origin_region if origin_region != "All" else "",
-            entry_mode if entry_mode != "All" else "",
-            impact_sector if impact_sector != "All" else "",
-        ))
+        """, tuple(row.values()))
         conn.commit(); conn.close()
     except Exception:
         pass
