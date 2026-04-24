@@ -577,10 +577,11 @@ def make_hero(n_records: int) -> str:
     return f"""
 <style>
 .pt-hero-side {{ display:block; }}
+.pt-hero-mobile-viz {{ display:none; }}
 @media (max-width:860px) {{ .pt-hero-side {{ display:none !important; }} }}
 @media (max-width:768px) {{
   .pt-hero-outer {{
-    padding: 24px 18px 52px 18px !important;
+    padding: 24px 18px 22px 18px !important;
     min-height: auto !important;
   }}
   .pt-hero-content {{ max-width: 100% !important; }}
@@ -590,6 +591,7 @@ def make_hero(n_records: int) -> str:
   .pt-hero-sub  {{ font-size: 0.9rem !important; margin-bottom: 5px !important; }}
   .pt-hero-tag  {{ font-size: 0.76rem !important; margin-bottom: 16px !important; }}
   .pt-hero-chip {{ padding: 5px 12px !important; font-size: 0.74rem !important; }}
+  .pt-hero-mobile-viz {{ display:block !important; margin-top:16px; width:100%; }}
 }}
 </style>
 <div class="pt-hero-outer" style="
@@ -764,6 +766,54 @@ def make_hero(n_records: int) -> str:
         border-radius:4px;padding:7px 18px;font-family:'Oswald',sans-serif;font-size:0.82rem;
         font-weight:600;color:#EEB638;letter-spacing:0.04em;">PEER-REVIEWED</div>
     </div>
+  </div>
+  <div class="pt-hero-mobile-viz">
+    <svg width="100%" viewBox="0 0 360 100" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMinYMid meet">
+      <path d="M 8 72 Q 48 40 88 56 Q 112 66 115 48" fill="none" stroke="#86B233" stroke-width="2" stroke-dasharray="6,4" opacity="0.6"/>
+      <circle cx="52" cy="44" r="5" fill="#86B233" opacity="0.3"/><circle cx="52" cy="44" r="9" fill="none" stroke="#86B233" stroke-width="1.5" opacity="0.2"/>
+      <circle cx="92" cy="56" r="5" fill="#EEB638" opacity="0.5"/><circle cx="92" cy="56" r="9" fill="none" stroke="#EEB638" stroke-width="1.5" opacity="0.3"/>
+      <g transform="translate(155,50)">
+        <circle r="42" fill="#03192b" opacity="0.92" stroke="#86B233" stroke-width="1.5"/>
+        <circle r="33" fill="none" stroke="#86B233" stroke-width="0.6" opacity="0.35"/>
+        <circle r="22" fill="none" stroke="#86B233" stroke-width="0.6" opacity="0.25"/>
+        <line x1="-42" y1="0" x2="-16" y2="0" stroke="#86B233" stroke-width="0.6" opacity="0.4"/>
+        <line x1="16" y1="0" x2="42" y2="0" stroke="#86B233" stroke-width="0.6" opacity="0.4"/>
+        <line x1="0" y1="-42" x2="0" y2="-16" stroke="#86B233" stroke-width="0.6" opacity="0.4"/>
+        <line x1="0" y1="16" x2="0" y2="42" stroke="#86B233" stroke-width="0.6" opacity="0.4"/>
+        <ellipse cx="0" cy="7" rx="8" ry="12" fill="none" stroke="#d0e8f2" stroke-width="1"/>
+        <ellipse cx="0" cy="-6" rx="7" ry="6" fill="none" stroke="#d0e8f2" stroke-width="1"/>
+        <circle cx="0" cy="-16" r="5" fill="none" stroke="#d0e8f2" stroke-width="1"/>
+        <path d="M-2,-20 L-5,-26 L-9,-31 L-11,-36" stroke="#a8c8dc" stroke-width="0.8" fill="none"/>
+        <path d="M 2,-20 L  5,-26 L  9,-31 L 11,-36" stroke="#a8c8dc" stroke-width="0.8" fill="none"/>
+        <path d="M-6,-5 L-14,-2 L-22,-8" stroke="#a8c8dc" stroke-width="0.8" fill="none"/>
+        <path d="M 6,-5 L 14,-2 L 22,-8" stroke="#a8c8dc" stroke-width="0.8" fill="none"/>
+        <path d="M-7,3 L-18,3 L-26,9" stroke="#a8c8dc" stroke-width="0.8" fill="none"/>
+        <path d="M 7,3 L 18,3 L 26,9" stroke="#a8c8dc" stroke-width="0.8" fill="none"/>
+        <circle cx="0" cy="7" r="4" fill="none" stroke="#EEB638" stroke-width="1.2" opacity="0.9"/>
+        <circle cx="0" cy="7" r="1.5" fill="#EEB638" opacity="0.9"/>
+      </g>
+      <text x="210" y="10" font-family="Oswald,sans-serif" font-size="8" font-weight="600" fill="#86B233" letter-spacing="0.1em">DETECTION MAP</text>
+      <circle cx="212" cy="24" r="4" fill="#86B233"/><circle cx="212" cy="24" r="7" fill="none" stroke="#86B233" stroke-width="0.8" opacity="0.4"/>
+      <circle cx="228" cy="19" r="3" fill="#86B233" opacity="0.6"/>
+      <circle cx="244" cy="27" r="5" fill="#EEB638"/><circle cx="244" cy="27" r="8" fill="none" stroke="#EEB638" stroke-width="0.8" opacity="0.4"/>
+      <circle cx="260" cy="21" r="3" fill="#86B233" opacity="0.7"/>
+      <circle cx="276" cy="28" r="4" fill="#86B233"/>
+      <circle cx="292" cy="19" r="4" fill="#116AAB" opacity="0.8"/>
+      <circle cx="308" cy="25" r="3" fill="#86B233" opacity="0.6"/>
+      <circle cx="220" cy="44" r="3" fill="#86B233" opacity="0.6"/>
+      <circle cx="236" cy="38" r="5" fill="#EEB638"/><circle cx="236" cy="38" r="8" fill="none" stroke="#EEB638" stroke-width="0.8" opacity="0.35"/>
+      <circle cx="252" cy="47" r="4" fill="#86B233"/>
+      <circle cx="268" cy="40" r="3" fill="#86B233" opacity="0.5"/>
+      <circle cx="284" cy="49" r="4" fill="#116AAB" opacity="0.75"/>
+      <circle cx="300" cy="41" r="4" fill="#86B233" opacity="0.7"/>
+      <circle cx="316" cy="50" r="3" fill="#EEB638" opacity="0.6"/>
+      <circle cx="212" cy="68" r="4" fill="#86B233"/>
+      <text x="220" y="72" font-family="Roboto,sans-serif" font-size="9" fill="#a8c8dc">Established</text>
+      <circle cx="275" cy="68" r="4" fill="#EEB638"/>
+      <text x="283" y="72" font-family="Roboto,sans-serif" font-size="9" fill="#a8c8dc">Active Spread</text>
+      <circle cx="212" cy="84" r="4" fill="#116AAB"/>
+      <text x="220" y="88" font-family="Roboto,sans-serif" font-size="9" fill="#a8c8dc">New Detection</text>
+    </svg>
   </div>
 </div>
 """
