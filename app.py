@@ -84,9 +84,9 @@ h1, h2, h3, h4, h5 {
 /* ── Sidebar — desktop only fixed width ────────────────────────── */
 @media (min-width: 769px) {
     section[data-testid="stSidebar"] {
-        width: 320px !important;
-        min-width: 320px !important;
-        max-width: 320px !important;
+        width: 260px !important;
+        min-width: 260px !important;
+        max-width: 260px !important;
     }
     [data-testid="stSidebarResizeHandle"],
     [class*="ResizeHandle"],
@@ -530,236 +530,111 @@ div[data-testid="stTabContent"] {
 st.markdown(CUSTOM_CSS, unsafe_allow_html=True)
 
 # ══════════════════════════════════════════════════════════════════════════════
-# SVG HERO BANNER  — STELLA-inspired full-width, dark immersive, left-aligned
+# HTML HERO BANNER  — CSS-based, fully responsive, no iframe, no cropping
 # ══════════════════════════════════════════════════════════════════════════════
 def make_hero(n_records: int) -> str:
     return f"""
-<div style="width:100%;height:460px;margin:0;padding:0;overflow:hidden;border-radius:0 0 14px 14px;background:linear-gradient(135deg,#04243a 0%,#07334E 60%,#0d4a2e 100%);">
-<svg viewBox="0 0 1200 340" xmlns="http://www.w3.org/2000/svg"
-     preserveAspectRatio="xMinYMid slice"
-     style="width:100%;height:100%;display:block;">
-  <defs>
-    <linearGradient id="sky" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%"   stop-color="#04243a"/>
-      <stop offset="60%"  stop-color="#07334E"/>
-      <stop offset="100%" stop-color="#0d4a2e"/>
-    </linearGradient>
-    <linearGradient id="fieldGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-      <stop offset="0%"  stop-color="#1b4332"/>
-      <stop offset="100%" stop-color="#0d2b1e"/>
-    </linearGradient>
-    <linearGradient id="leafGr" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%"  stop-color="#86B233"/>
-      <stop offset="100%" stop-color="#4a7c10"/>
-    </linearGradient>
-    <filter id="blur2"><feGaussianBlur stdDeviation="2.5"/></filter>
-    <filter id="glow">
-      <feGaussianBlur stdDeviation="4" result="blur"/>
-      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
-    </filter>
-  </defs>
+<style>
+.pt-hero-side {{ display: block; }}
+@media (max-width: 860px) {{ .pt-hero-side {{ display: none !important; }} }}
+</style>
+<div style="
+  width:100%;padding:48px 52px 44px 52px;
+  background:linear-gradient(135deg,#04243a 0%,#07334E 60%,#0d4a2e 100%);
+  border-radius:0 0 14px 14px;box-sizing:border-box;
+  position:relative;overflow:hidden;">
 
-  <!-- Sky background -->
-  <rect width="1200" height="280" fill="url(#sky)"/>
+  <!-- Field strip bottom decoration -->
+  <div style="position:absolute;bottom:0;left:0;right:0;height:20px;
+    background:linear-gradient(to top,#0a2018 0%,#0d2b1e 100%);opacity:0.75;"></div>
 
-  <!-- Subtle grid overlay -->
-  <line x1="0" y1="70"  x2="1200" y2="70"  stroke="#ffffff" stroke-width="0.3" opacity="0.04"/>
-  <line x1="0" y1="140" x2="1200" y2="140" stroke="#ffffff" stroke-width="0.3" opacity="0.04"/>
-  <line x1="0" y1="210" x2="1200" y2="210" stroke="#ffffff" stroke-width="0.3" opacity="0.04"/>
-  <line x1="300"  y1="0" x2="300"  y2="280" stroke="#ffffff" stroke-width="0.3" opacity="0.04"/>
-  <line x1="600"  y1="0" x2="600"  y2="280" stroke="#ffffff" stroke-width="0.3" opacity="0.04"/>
-  <line x1="900"  y1="0" x2="900"  y2="280" stroke="#ffffff" stroke-width="0.3" opacity="0.04"/>
+  <!-- Leaf shapes top-right -->
+  <div class="pt-hero-side" style="position:absolute;top:-16px;right:210px;
+    width:90px;height:36px;background:linear-gradient(135deg,#86B233,#4a7c10);
+    border-radius:50%;transform:rotate(15deg);opacity:0.25;pointer-events:none;"></div>
+  <div class="pt-hero-side" style="position:absolute;top:18px;right:228px;
+    width:60px;height:24px;background:#86B233;border-radius:50%;
+    transform:rotate(-20deg);opacity:0.15;pointer-events:none;"></div>
 
-  <!-- Ambient glow spots -->
-  <ellipse cx="200" cy="260" rx="180" ry="60" fill="#86B233" opacity="0.06" filter="url(#blur2)"/>
-  <ellipse cx="950" cy="260" rx="200" ry="70" fill="#116AAB" opacity="0.06" filter="url(#blur2)"/>
+  <!-- Radar / biosurveillance scope (right) -->
+  <div class="pt-hero-side" style="position:absolute;right:36px;top:50%;
+    transform:translateY(-50%);pointer-events:none;">
+    <svg width="152" height="152" viewBox="-76 -76 152 152" xmlns="http://www.w3.org/2000/svg">
+      <circle r="76" fill="#03192b" opacity="0.92" stroke="#86B233" stroke-width="2"/>
+      <circle r="60" fill="none" stroke="#86B233" stroke-width="0.75" opacity="0.35"/>
+      <circle r="44" fill="none" stroke="#86B233" stroke-width="0.75" opacity="0.25"/>
+      <circle r="26" fill="none" stroke="#86B233" stroke-width="0.75" opacity="0.2"/>
+      <line x1="-76" y1="0" x2="-28" y2="0" stroke="#86B233" stroke-width="0.8" opacity="0.4"/>
+      <line x1="28" y1="0" x2="76" y2="0" stroke="#86B233" stroke-width="0.8" opacity="0.4"/>
+      <line x1="0" y1="-76" x2="0" y2="-28" stroke="#86B233" stroke-width="0.8" opacity="0.4"/>
+      <line x1="0" y1="28" x2="0" y2="76" stroke="#86B233" stroke-width="0.8" opacity="0.4"/>
+      <line x1="-76" y1="-4" x2="-76" y2="4" stroke="#86B233" stroke-width="1.5" opacity="0.55"/>
+      <line x1="76" y1="-4" x2="76" y2="4" stroke="#86B233" stroke-width="1.5" opacity="0.55"/>
+      <line x1="-4" y1="-76" x2="4" y2="-76" stroke="#86B233" stroke-width="1.5" opacity="0.55"/>
+      <line x1="-4" y1="76" x2="4" y2="76" stroke="#86B233" stroke-width="1.5" opacity="0.55"/>
+      <line x1="-60" y1="-20" x2="60" y2="-20" stroke="#86B233" stroke-width="1" opacity="0.4" stroke-dasharray="5,4"/>
+      <!-- Insect schematic -->
+      <ellipse cx="0" cy="12" rx="13" ry="19" fill="none" stroke="#d0e8f2" stroke-width="1.5"/>
+      <ellipse cx="0" cy="-10" rx="11" ry="9" fill="none" stroke="#d0e8f2" stroke-width="1.5"/>
+      <circle cx="0" cy="-26" r="8" fill="none" stroke="#d0e8f2" stroke-width="1.5"/>
+      <line x1="-10" y1="-3" x2="10" y2="-3" stroke="#d0e8f2" stroke-width="1" opacity="0.55"/>
+      <line x1="0" y1="-3" x2="0" y2="29" stroke="#d0e8f2" stroke-width="1" opacity="0.55"/>
+      <path d="M-4,-33 L-9,-43 L-15,-50 L-17,-58" stroke="#a8c8dc" stroke-width="1.2" fill="none" stroke-linejoin="round"/>
+      <path d="M 4,-33 L  9,-43 L 15,-50 L 17,-58" stroke="#a8c8dc" stroke-width="1.2" fill="none" stroke-linejoin="round"/>
+      <circle cx="-17" cy="-58" r="2.5" fill="#EEB638" opacity="0.9"/>
+      <circle cx="17" cy="-58" r="2.5" fill="#EEB638" opacity="0.9"/>
+      <path d="M-9,-8 L-22,-4 L-36,-12" stroke="#a8c8dc" stroke-width="1.2" fill="none"/>
+      <path d="M 9,-8 L 22,-4 L 36,-12" stroke="#a8c8dc" stroke-width="1.2" fill="none"/>
+      <path d="M-11,4 L-28,4 L-42,14" stroke="#a8c8dc" stroke-width="1.2" fill="none"/>
+      <path d="M 11,4 L 28,4 L 42,14" stroke="#a8c8dc" stroke-width="1.2" fill="none"/>
+      <path d="M-11,18 L-27,24 L-36,36" stroke="#a8c8dc" stroke-width="1.2" fill="none"/>
+      <path d="M 11,18 L 27,24 L 36,36" stroke="#a8c8dc" stroke-width="1.2" fill="none"/>
+      <circle cx="0" cy="12" r="6" fill="none" stroke="#EEB638" stroke-width="1.5" opacity="0.9"/>
+      <circle cx="0" cy="12" r="2" fill="#EEB638" opacity="0.9"/>
+    </svg>
+  </div>
 
-  <!-- ── Crop field silhouette (bottom) ──────────────────────── -->
-  <!-- Wheat/corn stalks row -->
-  <g opacity="0.45" fill="#1b4332">
-    <!-- stalk pattern repeated -->
-    <rect x="0"   y="230" width="3"  height="50"/>  <ellipse cx="1.5"  cy="228" rx="5"  ry="14" fill="#2d6a4f"/>
-    <rect x="14"  y="238" width="3"  height="42"/>  <ellipse cx="15.5" cy="236" rx="4"  ry="11" fill="#2d6a4f"/>
-    <rect x="26"  y="232" width="3"  height="48"/>  <ellipse cx="27.5" cy="230" rx="5"  ry="13" fill="#2d6a4f"/>
-    <rect x="40"  y="240" width="3"  height="40"/>  <ellipse cx="41.5" cy="238" rx="4"  ry="10" fill="#2d6a4f"/>
-    <rect x="54"  y="234" width="3"  height="46"/>  <ellipse cx="55.5" cy="232" rx="5"  ry="12" fill="#2d6a4f"/>
-    <rect x="68"  y="242" width="3"  height="38"/>  <ellipse cx="69.5" cy="240" rx="4"  ry="10" fill="#2d6a4f"/>
-    <rect x="82"  y="228" width="3"  height="52"/>  <ellipse cx="83.5" cy="226" rx="6"  ry="15" fill="#2d6a4f"/>
-    <rect x="98"  y="236" width="3"  height="44"/>  <ellipse cx="99.5" cy="234" rx="5"  ry="12" fill="#2d6a4f"/>
-    <rect x="112" y="230" width="3"  height="50"/>  <ellipse cx="113"  cy="228" rx="5"  ry="13" fill="#2d6a4f"/>
-    <rect x="126" y="240" width="3"  height="40"/>  <ellipse cx="127"  cy="238" rx="4"  ry="10" fill="#2d6a4f"/>
-    <rect x="140" y="234" width="3"  height="46"/>  <ellipse cx="141"  cy="232" rx="5"  ry="12" fill="#2d6a4f"/>
-    <!-- darker back row -->
-    <rect x="5"   y="248" width="2"  height="32"/> <rect x="19"  y="252" width="2" height="28"/>
-    <rect x="33"  y="246" width="2"  height="34"/> <rect x="47"  y="250" width="2" height="30"/>
-    <rect x="61"  y="248" width="2"  height="32"/> <rect x="75"  y="244" width="2" height="36"/>
-    <rect x="89"  y="250" width="2"  height="30"/> <rect x="103" y="248" width="2" height="32"/>
-    <rect x="117" y="246" width="2"  height="34"/> <rect x="131" y="252" width="2" height="28"/>
-    <rect x="145" y="248" width="2"  height="32"/>
-  </g>
-  <!-- Right side stalks -->
-  <g opacity="0.35" fill="#1b4332">
-    <rect x="1050" y="232" width="3" height="48"/> <ellipse cx="1051" cy="230" rx="5" ry="13" fill="#2d6a4f"/>
-    <rect x="1064" y="240" width="3" height="40"/> <ellipse cx="1065" cy="238" rx="4" ry="10" fill="#2d6a4f"/>
-    <rect x="1078" y="228" width="3" height="52"/> <ellipse cx="1079" cy="226" rx="6" ry="15" fill="#2d6a4f"/>
-    <rect x="1092" y="236" width="3" height="44"/> <ellipse cx="1093" cy="234" rx="5" ry="12" fill="#2d6a4f"/>
-    <rect x="1106" y="232" width="3" height="48"/> <ellipse cx="1107" cy="230" rx="5" ry="13" fill="#2d6a4f"/>
-    <rect x="1120" y="242" width="3" height="38"/> <ellipse cx="1121" cy="240" rx="4" ry="10" fill="#2d6a4f"/>
-    <rect x="1134" y="230" width="3" height="50"/> <ellipse cx="1135" cy="228" rx="5" ry="13" fill="#2d6a4f"/>
-    <rect x="1148" y="236" width="3" height="44"/> <ellipse cx="1149" cy="234" rx="4" ry="12" fill="#2d6a4f"/>
-    <rect x="1162" y="232" width="3" height="48"/> <ellipse cx="1163" cy="230" rx="5" ry="13" fill="#2d6a4f"/>
-    <rect x="1176" y="240" width="3" height="40"/> <ellipse cx="1177" cy="238" rx="4" ry="10" fill="#2d6a4f"/>
-    <rect x="1190" y="228" width="3" height="52"/> <ellipse cx="1191" cy="226" rx="6" ry="14" fill="#2d6a4f"/>
-  </g>
-  <!-- Ground strip -->
-  <rect x="0" y="258" width="1200" height="22" fill="#0d2b1e" opacity="0.6"/>
-  <rect x="0" y="265" width="1200" height="15" fill="#0a2018" opacity="0.8"/>
+  <!-- Detection dots (decorative, mid-right area) -->
+  <div class="pt-hero-side" style="position:absolute;right:210px;top:35%;pointer-events:none;opacity:0.65;">
+    <svg width="120" height="80" viewBox="0 0 120 80" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="10" cy="20" r="4" fill="#86B233"/><circle cx="10" cy="20" r="8" fill="none" stroke="#86B233" stroke-width="1" opacity="0.4"/>
+      <circle cx="35" cy="12" r="3" fill="#86B233" opacity="0.6"/>
+      <circle cx="60" cy="24" r="5" fill="#EEB638"/><circle cx="60" cy="24" r="9" fill="none" stroke="#EEB638" stroke-width="1" opacity="0.4"/>
+      <circle cx="85" cy="14" r="3" fill="#86B233" opacity="0.7"/>
+      <circle cx="108" cy="22" r="4" fill="#116AAB" opacity="0.8"/>
+      <circle cx="18" cy="50" r="3" fill="#EEB638" opacity="0.6"/>
+      <circle cx="45" cy="44" r="4" fill="#86B233"/>
+      <circle cx="72" cy="55" r="3" fill="#86B233" opacity="0.5"/>
+      <circle cx="98" cy="46" r="5" fill="#86B233"/>
+    </svg>
+  </div>
 
-  <!-- ── Decorative leaf — top right of center ───────────────── -->
-  <g transform="translate(700, 30) rotate(15)">
-    <ellipse rx="45" ry="18" fill="url(#leafGr)" opacity="0.25"/>
-    <line x1="-40" y1="4" x2="40" y2="-4" stroke="#86B233" stroke-width="1.5" opacity="0.3"/>
-  </g>
-  <g transform="translate(720, 60) rotate(-20)">
-    <ellipse rx="30" ry="12" fill="#86B233" opacity="0.15"/>
-  </g>
-
-  <!-- ── Precision biosurveillance detection scope (center visual) ── -->
-  <g transform="translate(730, 140)">
-    <!-- Outer precision ring -->
-    <circle r="70" fill="#03192b" opacity="0.9" stroke="#86B233" stroke-width="2"/>
-    <!-- Concentric measurement rings -->
-    <circle r="56" fill="none" stroke="#86B233" stroke-width="0.75" opacity="0.35"/>
-    <circle r="40" fill="none" stroke="#86B233" stroke-width="0.75" opacity="0.25"/>
-    <circle r="24" fill="none" stroke="#86B233" stroke-width="0.75" opacity="0.2"/>
-    <!-- Crosshair reticle (broken at center) -->
-    <line x1="-70" y1="0" x2="-26" y2="0" stroke="#86B233" stroke-width="0.8" opacity="0.4"/>
-    <line x1="26" y1="0" x2="70" y2="0" stroke="#86B233" stroke-width="0.8" opacity="0.4"/>
-    <line x1="0" y1="-70" x2="0" y2="-26" stroke="#86B233" stroke-width="0.8" opacity="0.4"/>
-    <line x1="0" y1="26" x2="0" y2="70" stroke="#86B233" stroke-width="0.8" opacity="0.4"/>
-    <!-- Cardinal tick marks -->
-    <line x1="-70" y1="-4" x2="-70" y2="4" stroke="#86B233" stroke-width="1.5" opacity="0.55"/>
-    <line x1="70" y1="-4" x2="70" y2="4" stroke="#86B233" stroke-width="1.5" opacity="0.55"/>
-    <line x1="-4" y1="-70" x2="4" y2="-70" stroke="#86B233" stroke-width="1.5" opacity="0.55"/>
-    <line x1="-4" y1="70" x2="4" y2="70" stroke="#86B233" stroke-width="1.5" opacity="0.55"/>
-
-    <!-- Schematic insect (technical line-art: coleopteran morphology) -->
-    <!-- Abdomen -->
-    <ellipse cx="0" cy="12" rx="13" ry="19" fill="none" stroke="#d0e8f2" stroke-width="1.5"/>
-    <!-- Thorax -->
-    <ellipse cx="0" cy="-10" rx="11" ry="9" fill="none" stroke="#d0e8f2" stroke-width="1.5"/>
-    <!-- Head capsule -->
-    <circle cx="0" cy="-26" r="8" fill="none" stroke="#d0e8f2" stroke-width="1.5"/>
-    <!-- Pronotum / scutellum boundary -->
-    <line x1="-10" y1="-3" x2="10" y2="-3" stroke="#d0e8f2" stroke-width="1" opacity="0.55"/>
-    <!-- Elytral suture -->
-    <line x1="0" y1="-3" x2="0" y2="29" stroke="#d0e8f2" stroke-width="1" opacity="0.55"/>
-    <!-- Segmented antennae (geniculate) -->
-    <path d="M-4,-33 L-9,-43 L-15,-50 L-17,-58" stroke="#a8c8dc" stroke-width="1.2" fill="none" stroke-linejoin="round"/>
-    <path d="M 4,-33 L  9,-43 L 15,-50 L 17,-58" stroke="#a8c8dc" stroke-width="1.2" fill="none" stroke-linejoin="round"/>
-    <circle cx="-17" cy="-58" r="2.5" fill="#EEB638" opacity="0.9"/>
-    <circle cx="17" cy="-58" r="2.5" fill="#EEB638" opacity="0.9"/>
-    <!-- Forelegs -->
-    <path d="M-9,-8 L-22,-4 L-36,-12" stroke="#a8c8dc" stroke-width="1.2" fill="none"/>
-    <path d="M 9,-8 L 22,-4 L 36,-12" stroke="#a8c8dc" stroke-width="1.2" fill="none"/>
-    <!-- Midlegs -->
-    <path d="M-11,4 L-28,4 L-42,14" stroke="#a8c8dc" stroke-width="1.2" fill="none"/>
-    <path d="M 11,4 L 28,4 L 42,14" stroke="#a8c8dc" stroke-width="1.2" fill="none"/>
-    <!-- Hindlegs -->
-    <path d="M-11,18 L-27,24 L-36,36" stroke="#a8c8dc" stroke-width="1.2" fill="none"/>
-    <path d="M 11,18 L 27,24 L 36,36" stroke="#a8c8dc" stroke-width="1.2" fill="none"/>
-
-    <!-- Target detection indicator -->
-    <circle cx="0" cy="12" r="6" fill="none" stroke="#EEB638" stroke-width="1.5" opacity="0.9"/>
-    <circle cx="0" cy="12" r="2" fill="#EEB638" opacity="0.9"/>
-    <!-- Active scan line -->
-    <line x1="-56" y1="-18" x2="56" y2="-18" stroke="#86B233" stroke-width="1" opacity="0.45" stroke-dasharray="5,4"/>
-
-    <!-- Instrument handle (minimal) -->
-    <line x1="50" y1="50" x2="76" y2="78" stroke="#a8c8dc" stroke-width="8" stroke-linecap="round" opacity="0.3"/>
-    <line x1="50" y1="50" x2="76" y2="78" stroke="#d0e8f2" stroke-width="3" stroke-linecap="round" opacity="0.18"/>
-  </g>
-
-  <!-- ── Dotted invasion spread path ─────────────────────────── -->
-  <path d="M 300 200 Q 450 120 590 160 Q 660 182 662 142"
-        fill="none" stroke="#86B233" stroke-width="2"
-        stroke-dasharray="8,6" opacity="0.4"/>
-  <circle cx="450" cy="143" r="6" fill="#86B233" opacity="0.3"/>
-  <circle cx="450" cy="143" r="11" fill="none" stroke="#86B233" stroke-width="1.5" opacity="0.2"/>
-  <circle cx="560" cy="162" r="6" fill="#EEB638" opacity="0.45"/>
-  <circle cx="560" cy="162" r="11" fill="none" stroke="#EEB638" stroke-width="1.5" opacity="0.25"/>
-
-  <!-- ── Right panel: detection dot-grid ─────────────────────── -->
-  <!-- Column grid of state dots -->
-  <g opacity="0.8">
-    <circle cx="870"  cy="80"  r="5" fill="#86B233"/><circle cx="870"  cy="80"  r="9" fill="none" stroke="#86B233" stroke-width="1" opacity="0.4"/>
-    <circle cx="900"  cy="72"  r="4" fill="#86B233" opacity="0.6"/>
-    <circle cx="928"  cy="85"  r="6" fill="#EEB638"/><circle cx="928"  cy="85"  r="10" fill="none" stroke="#EEB638" stroke-width="1" opacity="0.4"/>
-    <circle cx="958"  cy="75"  r="4" fill="#86B233" opacity="0.7"/>
-    <circle cx="986"  cy="88"  r="5" fill="#86B233"/>
-    <circle cx="1016" cy="72"  r="6" fill="#116AAB" opacity="0.8"/>
-    <circle cx="1044" cy="84"  r="4" fill="#86B233" opacity="0.6"/>
-
-    <circle cx="862"  cy="112" r="4" fill="#86B233" opacity="0.6"/>
-    <circle cx="888"  cy="105" r="6" fill="#EEB638"/><circle cx="888" cy="105" r="10" fill="none" stroke="#EEB638" stroke-width="1" opacity="0.35"/>
-    <circle cx="916"  cy="118" r="5" fill="#86B233"/>
-    <circle cx="944"  cy="108" r="4" fill="#86B233" opacity="0.5"/>
-    <circle cx="970"  cy="120" r="6" fill="#116AAB" opacity="0.75"/>
-    <circle cx="998"  cy="110" r="5" fill="#86B233" opacity="0.7"/>
-    <circle cx="1026" cy="122" r="4" fill="#EEB638" opacity="0.6"/>
-    <circle cx="1052" cy="112" r="5" fill="#86B233"/>
-
-    <circle cx="874"  cy="146" r="5" fill="#86B233" opacity="0.7"/>
-    <circle cx="902"  cy="138" r="4" fill="#86B233" opacity="0.5"/>
-    <circle cx="930"  cy="150" r="6" fill="#EEB638"/>
-    <circle cx="956"  cy="140" r="5" fill="#86B233" opacity="0.6"/>
-    <circle cx="982"  cy="152" r="4" fill="#86B233"/>
-    <circle cx="1008" cy="142" r="6" fill="#116AAB" opacity="0.8"/>
-    <circle cx="1036" cy="154" r="4" fill="#86B233" opacity="0.6"/>
-
-    <!-- Legend -->
-    <circle cx="855" cy="188" r="5" fill="#86B233"/>
-    <text x="865" y="193" font-family="Roboto,sans-serif" font-size="11" fill="#a8c8dc">Established</text>
-    <circle cx="960" cy="188" r="5" fill="#EEB638"/>
-    <text x="970" y="193" font-family="Roboto,sans-serif" font-size="11" fill="#a8c8dc">Active Spread</text>
-    <circle cx="1075" cy="188" r="5" fill="#116AAB"/>
-    <text x="1085" y="193" font-family="Roboto,sans-serif" font-size="11" fill="#a8c8dc">New Detection</text>
-  </g>
-  <text x="862" y="68" font-family="Oswald,sans-serif" font-size="11" font-weight="600"
-        fill="#86B233" letter-spacing="0.12em" opacity="0.9">DETECTION MAP</text>
-
-  <!-- ── Left content block ──────────────────────────────────── -->
-  <!-- Main title -->
-  <text font-family="Oswald,sans-serif" font-weight="700" letter-spacing="0.04em">
-    <tspan x="50" y="108" font-size="68" fill="#ffffff">PEST</tspan><tspan font-size="48" fill="#86B233" baseline-shift="0">TRAIL</tspan>
-  </text>
-
-  <!-- Accent underline -->
-  <rect x="52" y="116" width="280" height="4" rx="2" fill="#86B233"/>
-
-  <!-- Subtitle -->
-  <text x="52" y="148" font-family="Roboto,sans-serif" font-size="16" font-weight="300"
-        fill="#a8c8dc" letter-spacing="0.02em">US Invasive Pest &amp; Pathogen Intelligence Platform</text>
-
-  <!-- Tagline -->
-  <text x="52" y="172" font-family="Roboto,sans-serif" font-size="12.5" font-weight="400"
-        fill="#6a9aaf" opacity="0.9">
-    Tracking pests · pathogens · inocula introduced since 1995
-  </text>
-
-  <!-- Stats chips -->
-  <rect x="52"  y="192" width="190" height="28" rx="4" fill="rgba(134,178,51,0.18)" stroke="#86B233" stroke-width="1" opacity="0.7"/>
-  <text x="147" y="210" font-family="Oswald,sans-serif" font-size="13" font-weight="600"
-        fill="#86B233" text-anchor="middle" letter-spacing="0.04em">{n_records} SPECIES TRACKED</text>
-
-  <rect x="252" y="192" width="116" height="28" rx="4" fill="rgba(17,106,171,0.18)" stroke="#116AAB" stroke-width="1" opacity="0.7"/>
-  <text x="310" y="210" font-family="Oswald,sans-serif" font-size="13" font-weight="600"
-        fill="#116AAB" text-anchor="middle" letter-spacing="0.04em">1995 — 2026</text>
-
-  <rect x="380" y="192" width="140" height="28" rx="4" fill="rgba(238,182,56,0.15)" stroke="#EEB638" stroke-width="1" opacity="0.7"/>
-  <text x="450" y="210" font-family="Oswald,sans-serif" font-size="13" font-weight="600"
-        fill="#EEB638" text-anchor="middle" letter-spacing="0.04em">PEER-REVIEWED</text>
-</svg>
+  <!-- Main left content -->
+  <div style="position:relative;z-index:1;max-width:640px;">
+    <div style="font-family:'Oswald',sans-serif;font-size:4.5rem;font-weight:700;
+      line-height:1;letter-spacing:0.04em;">
+      <span style="color:#ffffff;">PEST</span><span style="color:#86B233;">TRAIL</span>
+    </div>
+    <div style="width:280px;height:4px;background:#86B233;border-radius:2px;margin:10px 0 16px 0;"></div>
+    <div style="font-family:'Roboto',sans-serif;font-size:1rem;font-weight:300;
+      color:#a8c8dc;letter-spacing:0.02em;margin-bottom:6px;">
+      US Invasive Pest &amp; Pathogen Intelligence Platform
+    </div>
+    <div style="font-family:'Roboto',sans-serif;font-size:0.8rem;color:#6a9aaf;margin-bottom:24px;">
+      Tracking pests &middot; pathogens &middot; inocula introduced since 1995
+    </div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;">
+      <div style="background:rgba(134,178,51,0.18);border:1px solid rgba(134,178,51,0.7);
+        border-radius:4px;padding:7px 18px;font-family:'Oswald',sans-serif;font-size:0.82rem;
+        font-weight:600;color:#86B233;letter-spacing:0.04em;">{n_records} SPECIES TRACKED</div>
+      <div style="background:rgba(17,106,171,0.18);border:1px solid rgba(17,106,171,0.7);
+        border-radius:4px;padding:7px 18px;font-family:'Oswald',sans-serif;font-size:0.82rem;
+        font-weight:600;color:#116AAB;letter-spacing:0.04em;">1995 — 2026</div>
+      <div style="background:rgba(238,182,56,0.15);border:1px solid rgba(238,182,56,0.7);
+        border-radius:4px;padding:7px 18px;font-family:'Oswald',sans-serif;font-size:0.82rem;
+        font-weight:600;color:#EEB638;letter-spacing:0.04em;">PEER-REVIEWED</div>
+    </div>
+  </div>
 </div>
 """
 
@@ -934,8 +809,8 @@ if selected_status != "All": filtered = filtered[filtered["eradication_status"] 
 # ══════════════════════════════════════════════════════════════════════════════
 # HERO
 # ══════════════════════════════════════════════════════════════════════════════
-components.html(make_hero(len(df)), height=466, scrolling=False)
-st.markdown('<div style="padding:0 2rem;margin-top:-1.5rem;">', unsafe_allow_html=True)
+st.markdown(make_hero(len(df)), unsafe_allow_html=True)
+st.markdown('<div style="padding:0 2rem;margin-top:0;">', unsafe_allow_html=True)
 
 # ══════════════════════════════════════════════════════════════════════════════
 # SEARCH RESULT DETAIL CARD
