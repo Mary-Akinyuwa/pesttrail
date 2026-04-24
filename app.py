@@ -28,47 +28,58 @@ components.html("""
 </script>
 <script>
 (function() {
-  var SEL = [
+  var SELECTORS = [
     '[data-testid="stStatusWidget"]',
     '[data-testid="stToolbar"]',
     '[data-testid="stToolbarActions"]',
     '[data-testid="stDecoration"]',
     '[data-testid="manage-app-button"]',
+    '[data-testid="stViewerBadge"]',
+    '[data-testid="viewerBadge"]',
     '[class*="viewerBadge"]',
     '[class*="ViewerBadge"]',
+    '[class*="viewer_badge"]',
     '[class*="ProfileImage"]',
     '[class*="profile-image"]',
     '[class*="stDeployButton"]',
     '[class*="deployButton"]',
+    '[class*="StatusWidget"]',
+    'a[href*="streamlit.io/cloud"]',
+    'img[src*="avatars.githubusercontent.com"]',
     '#MainMenu',
-    'footer'
-  ].join(',');
+    'footer',
+    'header[data-testid="stHeader"]'
+  ];
+  var CSS = SELECTORS.join(',') + '{display:none!important;visibility:hidden!important;height:0!important;overflow:hidden!important;pointer-events:none!important;}';
+  function applyToDoc(doc) {
+    try {
+      if (!doc.getElementById('pt-hide-badge')) {
+        var s = doc.createElement('style');
+        s.id = 'pt-hide-badge';
+        s.textContent = CSS;
+        doc.head.appendChild(s);
+      }
+      SELECTORS.forEach(function(sel) {
+        try {
+          doc.querySelectorAll(sel).forEach(function(el) {
+            el.style.setProperty('display', 'none', 'important');
+          });
+        } catch(e) {}
+      });
+    } catch(e) {}
+  }
+  /* Apply to this document and the parent Streamlit document */
+  applyToDoc(document);
+  try { applyToDoc(window.parent.document); } catch(e) {}
+  /* MutationObserver on parent to catch late-mounted badge elements */
   try {
     var pdoc = window.parent.document;
-    /* Inject a <style> into parent <head> so it covers future elements */
-    if (!pdoc.getElementById('pt-hide-badge')) {
-      var s = pdoc.createElement('style');
-      s.id = 'pt-hide-badge';
-      s.textContent = SEL + '{display:none!important;visibility:hidden!important;height:0!important;overflow:hidden!important;}';
-      pdoc.head.appendChild(s);
-    }
-    /* Also forcibly hide any already-present elements */
-    function hideNow() {
-      try {
-        pdoc.querySelectorAll(SEL).forEach(function(el) {
-          el.style.setProperty('display', 'none', 'important');
-          el.style.setProperty('visibility', 'hidden', 'important');
-          el.style.setProperty('height', '0', 'important');
-        });
-      } catch(e) {}
-    }
-    hideNow();
-    /* Watch for anything Streamlit Cloud mounts after page load */
-    new MutationObserver(hideNow).observe(pdoc.body, {childList: true, subtree: true});
+    new MutationObserver(function() { applyToDoc(pdoc); })
+      .observe(pdoc.body, {childList: true, subtree: true});
   } catch(e) {}
 })();
 </script>
-""", height=0)
+""", height=1)
 
 # ── Server-side GA4 Measurement Protocol ─────────────────────────────────────
 def _ga4_pageview():
@@ -666,12 +677,19 @@ div[data-testid="stTabContent"] {
 [data-testid="stToolbarActions"] { display: none !important; }
 [data-testid="stDecoration"] { display: none !important; }
 [data-testid="manage-app-button"] { display: none !important; }
-.viewerBadge_container__r5tak,
-.viewerBadge_link__qRIco,
+[data-testid="stViewerBadge"] { display: none !important; }
+[data-testid="viewerBadge"] { display: none !important; }
+header[data-testid="stHeader"] { display: none !important; }
 [class*="viewerBadge"] { display: none !important; }
+[class*="ViewerBadge"] { display: none !important; }
+[class*="viewer_badge"] { display: none !important; }
+[class*="StatusWidget"] { display: none !important; }
 [class*="ProfileImage"] { display: none !important; }
 [class*="profile-image"] { display: none !important; }
-[class*="avatar"] { display: none !important; }
+[class*="stDeployButton"] { display: none !important; }
+[class*="deployButton"] { display: none !important; }
+a[href*="streamlit.io/cloud"] { display: none !important; }
+img[src*="avatars.githubusercontent.com"] { display: none !important; }
 button[title="Manage app"] { display: none !important; }
 button[aria-label="Manage app"] { display: none !important; }
 #MainMenu { visibility: hidden !important; }
