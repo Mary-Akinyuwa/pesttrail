@@ -46,7 +46,8 @@ def _ga4_pageview():
                     "page_title": "PestTrail",
                     "page_location": "https://pesttrail.streamlit.app",
                     "session_id": session_id,
-                    "engagement_time_msec": 1,
+                    "engagement_time_msec": 10001,  # GA4 needs ≥10 000ms to count as engaged session
+                    "session_engaged": "1",
                 }}]
             }
             if client_ip:
