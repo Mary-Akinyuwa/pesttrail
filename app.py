@@ -666,12 +666,15 @@ div[data-testid="stTabContent"] {
 [data-testid="stToolbarActions"] { display: none !important; }
 [data-testid="stDecoration"] { display: none !important; }
 [data-testid="manage-app-button"] { display: none !important; }
+[data-testid="stViewerBadge"] { display: none !important; }
+[data-testid="stCloudfrontBadge"] { display: none !important; }
+[data-testid="baseButton-headerNoPadding"] { display: none !important; }
 .viewerBadge_container__r5tak,
 .viewerBadge_link__qRIco,
 [class*="viewerBadge"] { display: none !important; }
+[class*="ViewerBadge"] { display: none !important; }
 [class*="ProfileImage"] { display: none !important; }
 [class*="profile-image"] { display: none !important; }
-[class*="avatar"] { display: none !important; }
 button[title="Manage app"] { display: none !important; }
 button[aria-label="Manage app"] { display: none !important; }
 #MainMenu { visibility: hidden !important; }
