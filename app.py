@@ -534,9 +534,9 @@ st.markdown(CUSTOM_CSS, unsafe_allow_html=True)
 # ══════════════════════════════════════════════════════════════════════════════
 def make_hero(n_records: int) -> str:
     return f"""
-<div style="width:100%;height:460px;margin:0;padding:0;overflow:hidden;border-radius:0 0 14px 14px;">
+<div style="width:100%;height:460px;margin:0;padding:0;overflow:hidden;border-radius:0 0 14px 14px;background:linear-gradient(135deg,#04243a 0%,#07334E 60%,#0d4a2e 100%);">
 <svg viewBox="0 0 1200 340" xmlns="http://www.w3.org/2000/svg"
-     preserveAspectRatio="xMidYMid slice"
+     preserveAspectRatio="xMinYMid slice"
      style="width:100%;height:100%;display:block;">
   <defs>
     <linearGradient id="sky" x1="0%" y1="0%" x2="100%" y2="100%">
