@@ -73,10 +73,12 @@ col_a, col_b = st.columns(2)
 with col_a:
     st.subheader("Daily Visits")
     daily = df.groupby("date").size().reset_index(name="visits")
+    daily["date"] = pd.to_datetime(daily["date"])
     fig_daily = px.bar(daily, x="date", y="visits", color="visits",
                        color_continuous_scale="Greens",
                        labels={"date": "Date", "visits": "Visits"})
     fig_daily.update_layout(height=320, margin=dict(l=0, r=0, t=20, b=0), showlegend=False)
+    fig_daily.update_xaxes(tickformat="%b %d", dtick="D1")
     st.plotly_chart(fig_daily, use_container_width=True)
 
 with col_b:
