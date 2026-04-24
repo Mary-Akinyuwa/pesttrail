@@ -2300,9 +2300,24 @@ with tab_pathway:
 
     if not heat_pivot.empty:
         import plotly.graph_objects as _go_hs
+        # Shorten x-axis labels for mobile to prevent overlap
+        _LABEL_SHORT = {
+            "Agricultural Produce / Seed": "Ag Produce",
+            "Cargo / Shipping": "Cargo",
+            "Livestock / Wildlife": "Livestock",
+            "Natural Dispersal / Wind": "Wind/Natural",
+            "Nursery & Plant Material": "Nursery",
+            "Solid Wood / Packing Material": "Wood/Packing",
+            "Unknown": "Unknown",
+        }
+        _xcols = list(heat_pivot.columns)
+        _xlabels = [_LABEL_SHORT.get(c, c) for c in _xcols] if is_mobile else _xcols
+        _heat_b  = 160 if is_mobile else 120
+        _heat_angle = -55 if is_mobile else -30
+        _cell_font  = 10 if is_mobile else 13
         fig = _go_hs.Figure(data=_go_hs.Heatmap(
             z=heat_pivot.values,
-            x=list(heat_pivot.columns),
+            x=_xlabels,
             y=list(heat_pivot.index),
             colorscale=[[0,"#f0f9ff"],[0.01,"#bae6fd"],[0.4,"#0ea5e9"],[1,"#07334E"]],
             showscale=True,
@@ -2310,17 +2325,19 @@ with tab_pathway:
                          tickfont=dict(size=11, color="#1e293b"), thickness=14),
             text=heat_pivot.values,
             texttemplate="%{text}",
-            textfont=dict(size=13, color="#1e293b"),
+            textfont=dict(size=_cell_font, color="#1e293b"),
             customdata=heat_hover.values,
             hovertemplate="<b>%{y} × %{x}</b><br>%{z} species:<br>%{customdata}<extra></extra>",
             zmin=0,
         ))
         fig.update_layout(
             height=max(_CH['small'], len(heat_pivot) * _CH['hrow'] + 120),
-            margin=dict(l=10, r=100, t=20, b=120),
-            xaxis=dict(tickangle=-30, tickfont=dict(size=11, color="#1e293b"),
+            margin=dict(l=10, r=60 if is_mobile else 100, t=20, b=_heat_b),
+            xaxis=dict(tickangle=_heat_angle, tickfont=dict(size=9 if is_mobile else 11, color="#1e293b"),
+                       automargin=True,
                        title_text="Entry Commodity Category", title_font=dict(size=12, color="#1e293b")),
-            yaxis=dict(tickfont=dict(size=11, color="#1e293b"),
+            yaxis=dict(tickfont=dict(size=9 if is_mobile else 11, color="#1e293b"),
+                       automargin=True,
                        title_text="Origin Region", title_font=dict(size=12, color="#1e293b")),
             **BASE
         )
