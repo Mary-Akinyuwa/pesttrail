@@ -924,6 +924,23 @@ if selected_status != "All": filtered = filtered[filtered["eradication_status"] 
 st.markdown(make_hero(len(df)), unsafe_allow_html=True)
 st.markdown('<div style="padding:0 2rem;margin-top:0;">', unsafe_allow_html=True)
 
+# ── Mobile search bar — injected into main content so users don't need sidebar ─
+if is_mobile:
+    st.markdown(
+        '<p style="font-family:\'Oswald\',sans-serif;font-size:0.85rem;font-weight:600;'
+        'color:#86B233;text-transform:uppercase;letter-spacing:0.08em;margin:14px 0 4px 0;">'
+        'Species / Pathogen Search</p>',
+        unsafe_allow_html=True
+    )
+    _mobile_search = st.text_input(
+        "Search",
+        placeholder="e.g. emerald ash borer, soybean, Florida…",
+        key="mobile_search_input",
+        label_visibility="collapsed"
+    )
+    if _mobile_search and _mobile_search.strip():
+        search_term = _mobile_search
+
 # ══════════════════════════════════════════════════════════════════════════════
 # SEARCH RESULT DETAIL CARD
 # ══════════════════════════════════════════════════════════════════════════════
