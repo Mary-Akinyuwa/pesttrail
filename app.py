@@ -44,6 +44,15 @@ def _ga4_pageview():
 
 _ga4_pageview()
 
+def _detect_mobile() -> bool:
+    try:
+        ua = st.context.headers.get("User-Agent", "")
+        return any(x in ua for x in ["Mobile","Android","iPhone","iPad","webOS","BlackBerry","IEMobile"])
+    except Exception:
+        return False
+
+is_mobile = _detect_mobile()
+
 streamlit_analytics.start_tracking()
 
 # Mobile viewport
@@ -127,8 +136,18 @@ button[title="streamlitApp"],
     section[data-testid="stSidebar"][aria-expanded="true"] {
         transform: translateX(0);
     }
+    /* Show sidebar open button on mobile so users can access filters */
+    [data-testid="stSidebarCollapsedControl"] {
+        display: flex !important;
+        position: fixed !important;
+        top: 0.75rem !important;
+        left: 0.75rem !important;
+        z-index: 1000 !important;
+        background: #07334E !important;
+        border-radius: 6px !important;
+    }
     .main .block-container {
-        padding: 0.75rem !important;
+        padding: 0 0.75rem 0.75rem 0.75rem !important;
         max-width: 100vw !important;
         width: 100vw !important;
         overflow-x: hidden !important;
@@ -138,20 +157,34 @@ button[title="streamlitApp"],
         width: 100vw !important;
         overflow-x: hidden !important;
     }
+    /* Stack all st.columns() layouts */
+    [data-testid="stHorizontalBlock"] {
+        flex-wrap: wrap !important;
+        gap: 0 !important;
+    }
+    [data-testid="column"] {
+        width: 100% !important;
+        min-width: 100% !important;
+        flex: 1 1 100% !important;
+        max-width: 100% !important;
+    }
+    /* KPI grid: 2 across on mobile */
     .kpi-row {
-        flex-direction: column !important;
+        grid-template-columns: 1fr 1fr !important;
         gap: 10px !important;
     }
-    .kpi-card {
-        min-width: 100% !important;
-        width: 100% !important;
+    .kpi-value { font-size: 1.8rem !important; }
+    /* Pest detail: 2-col grid on mobile */
+    .pdc-grid {
+        grid-template-columns: 1fr 1fr !important;
     }
     div[data-testid="stTabs"] button[role="tab"] {
-        font-size: 0.75rem !important;
-        padding: 4px 6px !important;
+        font-size: 0.72rem !important;
+        padding: 4px 5px !important;
     }
-    .pt-section-title { font-size: 1.2rem !important; }
-    .pt-section-sub { font-size: 0.8rem !important; }
+    .pt-section-title { font-size: 1.15rem !important; }
+    .pt-section-sub { font-size: 0.78rem !important; }
+    .pt-section-header { padding: 14px 16px 12px 16px !important; gap: 10px !important; }
 }
 section[data-testid="stSidebar"] > div {
     padding-top: 1.5rem;
@@ -1130,48 +1163,114 @@ with tab_policy:
                    f"Observed US invasive pest damage: ~{_damage_label}/year · USDA APHIS EDRR prevention appropriation: ~{_prev_label}/year · loss ratio quantifies the structural underinvestment in early detection and rapid response{_updated_str}")
 
     _src_footnote = "Fantle-Lepczyk et al. 2022 Sci. Total Environ. 819:153048 · USDA APHIS FY2025 Congressional Justification PPA §7721 · Liebhold &amp; Tobin (2008) Annu. Rev. Entomol. 53:387–408"
-    components.html(f"""
+
+    _roi_label  = str(_pg.get('roi_per_dollar','$17')).split('(')[0].strip()
+    _pox_roi    = _pg.get('plum_pox_roi','80×')
+    _pox_cost   = _pg.get('plum_pox_cost_million',50)
+    _pox_avoid  = _pg.get('plum_pox_avoided_billion',4)
+    _erad_win   = _pg.get('eradication_window_years',5)
+    _damage_val = _pg.get('annual_damage_label','$40B')
+    _prev_val   = _pg.get('annual_prevention_label','$75M')
+    _loss_ratio = _pg.get('loss_ratio','533×')
+
+    if is_mobile:
+        st.markdown(f"""
+<div style="background:#07334E;border-radius:12px;padding:18px 16px;">
+  <div style="background:rgba(239,68,68,0.12);border:1px solid rgba(239,68,68,0.4);
+    border-radius:10px;padding:18px;text-align:center;margin-bottom:10px;">
+    <div style="font-family:'Oswald',sans-serif;font-size:0.9rem;font-weight:700;
+      color:#fca5a5;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:6px;">
+      Annual Crop &amp; Ecosystem Damage</div>
+    <div style="font-family:'Oswald',sans-serif;font-size:2.6rem;font-weight:700;
+      color:#f87171;line-height:1;">{_damage_val}</div>
+    <div style="font-size:0.88rem;color:#fca5a5;margin-top:4px;">per year · US economy</div>
+    <div style="font-size:0.88rem;color:#c4dff0;margin-top:8px;line-height:1.5;">
+      Crops · forestry · water systems · invasive species only</div>
+  </div>
+  <div style="text-align:center;padding:10px 0;margin-bottom:10px;">
+    <div style="font-family:'Oswald',sans-serif;font-size:2.2rem;font-weight:700;
+      color:#EEB638;line-height:1;">{_loss_ratio}</div>
+    <div style="font-size:0.85rem;color:#a8c8dc;text-transform:uppercase;
+      letter-spacing:0.08em;margin-top:4px;">implied loss ratio per $1 prevention spent</div>
+    <div style="font-size:0.8rem;color:#9dc8dc;margin-top:3px;font-style:italic;">
+      computed from figures above — not independently cited</div>
+  </div>
+  <div style="background:rgba(134,178,51,0.1);border:1px solid rgba(134,178,51,0.35);
+    border-radius:10px;padding:18px;text-align:center;margin-bottom:14px;">
+    <div style="font-family:'Oswald',sans-serif;font-size:0.9rem;font-weight:700;
+      color:#86B233;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:6px;">
+      Annual Federal Prevention Budget</div>
+    <div style="font-family:'Oswald',sans-serif;font-size:2.6rem;font-weight:700;
+      color:#86B233;line-height:1;">{_prev_val}</div>
+    <div style="font-size:0.88rem;color:#a8d070;margin-top:4px;">per year · USDA APHIS PPQ</div>
+    <div style="font-size:0.88rem;color:#c4dff0;margin-top:8px;line-height:1.5;">
+      Early Detection &amp; Rapid Response · PPA §7721 · FY2025</div>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:0;
+    padding-top:12px;border-top:1px solid rgba(134,178,51,0.2);">
+    <div style="text-align:center;padding:10px 4px;">
+      <div style="font-family:'Oswald',sans-serif;font-size:1.5rem;color:#EEB638;
+        font-weight:700;line-height:1;">{_roi_label}</div>
+      <div style="font-size:0.78rem;color:#fff;font-weight:600;margin-top:4px;">per $1 spent</div>
+      <div style="font-size:0.72rem;color:#a8c8dc;margin-top:2px;">OTA 1993</div>
+    </div>
+    <div style="text-align:center;padding:10px 4px;
+      border-left:1px solid rgba(134,178,51,0.2);
+      border-right:1px solid rgba(134,178,51,0.2);">
+      <div style="font-family:'Oswald',sans-serif;font-size:1.5rem;color:#EEB638;
+        font-weight:700;line-height:1;">{_pox_roi}</div>
+      <div style="font-size:0.78rem;color:#fff;font-weight:600;margin-top:4px;">Plum Pox ROI</div>
+      <div style="font-size:0.72rem;color:#a8c8dc;margin-top:2px;">${_pox_cost}M → ${_pox_avoid}B</div>
+    </div>
+    <div style="text-align:center;padding:10px 4px;">
+      <div style="font-family:'Oswald',sans-serif;font-size:1.5rem;color:#EEB638;
+        font-weight:700;line-height:1;">&lt;{_erad_win} yrs</div>
+      <div style="font-size:0.78rem;color:#fff;font-weight:600;margin-top:4px;">erad. window</div>
+      <div style="font-size:0.72rem;color:#a8c8dc;margin-top:2px;">Liebhold 2008</div>
+    </div>
+  </div>
+</div>
+""", unsafe_allow_html=True)
+    else:
+        components.html(f"""
 <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@600;700&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
-<style>
-  *{{box-sizing:border-box;margin:0;padding:0;font-family:'Roboto',sans-serif;}}
-  iframe{{display:none;}}
-</style>
+<style>*{{box-sizing:border-box;margin:0;padding:0;font-family:'Roboto',sans-serif;}}iframe{{display:none;}}</style>
 <div style="background:#07334E;border-radius:12px;padding:28px 32px;">
   <div style="display:flex;gap:20px;align-items:stretch;">
     <div style="flex:1;background:rgba(239,68,68,0.12);border:1px solid rgba(239,68,68,0.4);border-radius:10px;padding:22px 24px;text-align:center;display:flex;flex-direction:column;justify-content:center;">
       <div style="font-family:'Oswald',sans-serif;font-size:1.125rem;font-weight:700;color:#fca5a5;letter-spacing:0.12em;text-transform:uppercase;margin-bottom:8px;">Annual Crop &amp; Ecosystem Damage</div>
-      <div style="font-family:'Oswald',sans-serif;font-size:3rem;font-weight:700;color:#f87171;line-height:1;">{_pg.get('annual_damage_label','$40B')}</div>
+      <div style="font-family:'Oswald',sans-serif;font-size:3rem;font-weight:700;color:#f87171;line-height:1;">{_damage_val}</div>
       <div style="font-size:1.0625rem;color:#fca5a5;margin-top:6px;">per year &middot; US economy</div>
       <div style="font-size:1.125rem;color:#c4dff0;margin-top:10px;line-height:1.5;">Crops · forestry · water systems<br>Invasive species only — native pest losses excluded</div>
     </div>
     <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0 8px;min-width:110px;">
-      <div style="font-family:'Oswald',sans-serif;font-size:2.6rem;font-weight:700;color:#EEB638;line-height:1;">{_pg.get('loss_ratio','533×')}</div>
+      <div style="font-family:'Oswald',sans-serif;font-size:2.6rem;font-weight:700;color:#EEB638;line-height:1;">{_loss_ratio}</div>
       <div style="font-size:1.125rem;color:#a8c8dc;text-transform:uppercase;letter-spacing:0.1em;margin-top:4px;text-align:center;">implied loss ratio<br>per $1 prevention spent</div>
       <div style="font-size:1.0625rem;color:#9dc8dc;margin-top:5px;text-align:center;font-style:italic;">computed from figures above —<br>not independently cited</div>
       <div style="width:2px;height:24px;background:rgba(134,178,51,0.3);margin-top:10px;"></div>
     </div>
     <div style="flex:1;background:rgba(134,178,51,0.1);border:1px solid rgba(134,178,51,0.35);border-radius:10px;padding:22px 24px;text-align:center;display:flex;flex-direction:column;justify-content:center;">
       <div style="font-family:'Oswald',sans-serif;font-size:1.125rem;font-weight:700;color:#86B233;letter-spacing:0.12em;text-transform:uppercase;margin-bottom:8px;">Annual Federal Prevention Budget</div>
-      <div style="font-family:'Oswald',sans-serif;font-size:3rem;font-weight:700;color:#86B233;line-height:1;">{_pg.get('annual_prevention_label','$75M')}</div>
+      <div style="font-family:'Oswald',sans-serif;font-size:3rem;font-weight:700;color:#86B233;line-height:1;">{_prev_val}</div>
       <div style="font-size:1.0625rem;color:#a8d070;margin-top:6px;">per year &middot; USDA APHIS PPQ</div>
       <div style="font-size:1.125rem;color:#c4dff0;margin-top:10px;line-height:1.5;">Early Detection &amp; Rapid Response line item<br>PPA §7721 · FY2025 Congressional Justification</div>
     </div>
   </div>
   <div style="margin-top:18px;padding-top:16px;border-top:1px solid rgba(134,178,51,0.2);display:flex;gap:0;">
     <div style="flex:1;text-align:center;padding:16px 12px;">
-      <div style="font-family:'Oswald',sans-serif;font-size:2rem;color:#EEB638;font-weight:700;line-height:1;">{str(_pg.get('roi_per_dollar','$17')).split('(')[0].strip()}</div>
+      <div style="font-family:'Oswald',sans-serif;font-size:2rem;color:#EEB638;font-weight:700;line-height:1;">{_roi_label}</div>
       <div style="font-size:1.125rem;color:#ffffff;font-weight:600;margin-top:6px;">returned per $1 spent</div>
       <div style="font-size:1.0625rem;color:#a8c8dc;margin-top:3px;">on early detection · OTA 1993 OTA-F-565</div>
     </div>
     <div style="width:1px;background:rgba(134,178,51,0.2);"></div>
     <div style="flex:1;text-align:center;padding:16px 12px;">
-      <div style="font-family:'Oswald',sans-serif;font-size:2rem;color:#EEB638;font-weight:700;line-height:1;">{_pg.get('plum_pox_roi','80×')}</div>
+      <div style="font-family:'Oswald',sans-serif;font-size:2rem;color:#EEB638;font-weight:700;line-height:1;">{_pox_roi}</div>
       <div style="font-size:1.125rem;color:#ffffff;font-weight:600;margin-top:6px;">Plum Pox eradication ROI</div>
-      <div style="font-size:1.0625rem;color:#a8c8dc;margin-top:3px;">${_pg.get('plum_pox_cost_million',50)}M cost · ${_pg.get('plum_pox_avoided_billion',4)}B avoided</div>
+      <div style="font-size:1.0625rem;color:#a8c8dc;margin-top:3px;">${_pox_cost}M cost · ${_pox_avoid}B avoided</div>
     </div>
     <div style="width:1px;background:rgba(134,178,51,0.2);"></div>
     <div style="flex:1;text-align:center;padding:16px 12px;">
-      <div style="font-family:'Oswald',sans-serif;font-size:2rem;color:#EEB638;font-weight:700;line-height:1;">&lt;{_pg.get('eradication_window_years',5)} yrs</div>
+      <div style="font-family:'Oswald',sans-serif;font-size:2rem;color:#EEB638;font-weight:700;line-height:1;">&lt;{_erad_win} yrs</div>
       <div style="font-size:1.125rem;color:#ffffff;font-weight:600;margin-top:6px;">eradication window</div>
       <div style="font-size:1.0625rem;color:#a8c8dc;margin-top:3px;">after establishment, feasibility drops sharply · Liebhold &amp; Tobin (2008)</div>
     </div>
