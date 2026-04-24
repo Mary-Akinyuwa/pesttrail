@@ -110,6 +110,8 @@ section[data-testid="stSidebar"] {
 }
 [data-testid="stSidebarNav"] { display: none !important; }
 [data-testid="stToolbar"] { display: none !important; }
+[data-testid="stSidebarCollapsedControl"] { display: none !important; }
+[data-testid="stSidebarCollapseButton"] { display: none !important; }
 header[data-testid="stHeader"] { display: none !important; }
 
 /* ── Unified scrolling — sidebar scrolls with page ─────────────── */
@@ -956,7 +958,7 @@ if selected_status != "All": filtered = filtered[filtered["eradication_status"] 
 # ══════════════════════════════════════════════════════════════════════════════
 # HERO
 # ══════════════════════════════════════════════════════════════════════════════
-components.html(make_hero(len(df)), height=390, scrolling=False)
+components.html(make_hero(len(df)), height=348, scrolling=False)
 
 # ══════════════════════════════════════════════════════════════════════════════
 # SEARCH RESULT DETAIL CARD
