@@ -104,9 +104,6 @@ h1, h2, h3, h4, h5 {
 section[data-testid="stSidebar"] {
     background: #07334E !important;
     border-right: none;
-    position: relative !important;
-    height: auto !important;
-    overflow: visible !important;
 }
 [data-testid="stSidebarNav"] { display: none !important; }
 [data-testid="stToolbar"] { display: none !important; }
@@ -114,26 +111,6 @@ section[data-testid="stSidebar"] {
 [data-testid="stSidebarCollapseButton"] { display: none !important; }
 header[data-testid="stHeader"] { display: none !important; }
 
-/* ── Unified scrolling — sidebar scrolls with page ─────────────── */
-html, body { overflow: auto !important; height: auto !important; }
-[data-testid="stAppViewContainer"] {
-    height: auto !important;
-    overflow: visible !important;
-    display: flex !important;
-    flex-direction: row !important;
-    align-items: flex-start !important;
-}
-[data-testid="stMain"] {
-    height: auto !important;
-    overflow: visible !important;
-}
-section[data-testid="stSidebar"] {
-    position: relative !important;
-    height: auto !important;
-    overflow-y: visible !important;
-    top: auto !important;
-    align-self: flex-start !important;
-}
 
 /* ── Mobile ────────────────────────────────────────────────────── */
 @media (max-width: 768px) {
