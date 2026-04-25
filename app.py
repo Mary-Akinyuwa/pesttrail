@@ -1003,17 +1003,20 @@ def log_visit(session_id, search_term, pest_type, origin_region, entry_mode, imp
         "filter_entry_mode": entry_mode if entry_mode != "All" else "",
         "filter_impact_sector": impact_sector if impact_sector != "All" else "",
     }
+    sb_ok = False
     # Write to Supabase (persistent across redeploys)
     if _SB_URL and _SB_KEY:
         try:
-            _requests.post(
+            resp = _requests.post(
                 f"{_SB_URL}/rest/v1/visits",
                 headers={"apikey": _SB_KEY, "Authorization": f"Bearer {_SB_KEY}",
                          "Content-Type": "application/json", "Prefer": "return=minimal"},
-                json=row, timeout=3
+                json=row, timeout=8
             )
-        except Exception:
-            pass
+            sb_ok = resp.status_code in (200, 201)
+            st.session_state["_sb_last_status"] = resp.status_code
+        except Exception as e:
+            st.session_state["_sb_last_status"] = str(e)
     # Always also write to local SQLite (for local dev / fallback)
     try:
         conn = sqlite3.connect(DB_PATH)
@@ -1025,6 +1028,7 @@ def log_visit(session_id, search_term, pest_type, origin_region, entry_mode, imp
         conn.commit(); conn.close()
     except Exception:
         pass
+    return sb_ok
 
 init_db()
 
@@ -1112,8 +1116,10 @@ selected_record_type = st.sidebar.selectbox("Record Type", record_types)
 eradication_statuses = ["All"] + sorted(df["eradication_status"].dropna().unique().tolist())
 selected_status    = st.sidebar.selectbox("Eradication Status", eradication_statuses)
 
-log_visit(st.session_state.session_id, search_term,
-          selected_type, selected_region, selected_mode, selected_sector)
+if "visit_logged" not in st.session_state:
+    st.session_state.visit_logged = True
+    log_visit(st.session_state.session_id, search_term,
+              selected_type, selected_region, selected_mode, selected_sector)
 
 # ══════════════════════════════════════════════════════════════════════════════
 # FILTER LOGIC

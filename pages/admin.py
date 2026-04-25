@@ -79,9 +79,34 @@ if _client_ip:
 else:
     st.warning("⚠️ **Geo tracking OFF** — only private/internal IPs found · GA4 map will not show countries · Streamlit Cloud may not forward real visitor IPs")
 
-# --- Data source indicator ---
+# --- Data source indicator + Supabase write test ---
 _using_supabase = bool(_SB_URL and _SB_KEY)
 st.caption(f"📦 Data source: {'☁️ Supabase (persistent)' if _using_supabase else '💾 Local SQLite (resets on redeploy — set SUPABASE_URL + SUPABASE_ANON_KEY in Streamlit Secrets to persist)'}")
+
+if _using_supabase:
+    if st.button("🔬 Test Supabase write"):
+        import json as _json
+        _test_row = {
+            "timestamp": __import__("datetime").datetime.utcnow().isoformat(),
+            "session_id": "admin-test",
+            "search_term": "__test__",
+            "filter_pest_type": "", "filter_origin_region": "",
+            "filter_entry_mode": "", "filter_impact_sector": ""
+        }
+        try:
+            _r = _req.post(
+                f"{_SB_URL}/rest/v1/visits",
+                headers={"apikey": _SB_KEY, "Authorization": f"Bearer {_SB_KEY}",
+                         "Content-Type": "application/json", "Prefer": "return=minimal"},
+                json=_test_row, timeout=8
+            )
+            if _r.status_code in (200, 201):
+                st.success(f"✅ Supabase write OK (HTTP {_r.status_code}) — visitor data is being saved")
+            else:
+                st.error(f"❌ Supabase write FAILED — HTTP {_r.status_code}: {_r.text[:300]}")
+                st.info("Most likely cause: Row Level Security (RLS) is blocking inserts. Go to Supabase → Table Editor → visits → RLS policies and add an INSERT policy for the anon role, or disable RLS on this table.")
+        except Exception as _e:
+            st.error(f"❌ Supabase connection error: {_e}")
 
 # --- Load analytics data ---
 def load_visits():
