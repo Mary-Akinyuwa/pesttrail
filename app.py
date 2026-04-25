@@ -75,6 +75,24 @@ components.html("""
           el.style.setProperty('visibility', 'hidden', 'important');
           el.style.setProperty('height', '0', 'important');
         });
+        /* Target badge by what it links to — works regardless of class name */
+        pdoc.querySelectorAll('a[href*="share.streamlit.io"]').forEach(function(el) {
+          var target = el;
+          /* Walk up to hide the whole badge container */
+          for (var i = 0; i < 5; i++) {
+            if (target && target.parentElement) target = target.parentElement;
+          }
+          if (target) target.style.setProperty('display', 'none', 'important');
+          el.style.setProperty('display', 'none', 'important');
+        });
+        /* Hide any img that is a GitHub avatar inside a fixed element */
+        pdoc.querySelectorAll('img[src*="avatars.githubusercontent.com"]').forEach(function(el) {
+          var p = el.parentElement;
+          for (var i = 0; i < 5; i++) {
+            if (p && p.parentElement) p = p.parentElement;
+          }
+          if (p) p.style.setProperty('display', 'none', 'important');
+        });
       } catch(e) {}
     }
     hideNow();
