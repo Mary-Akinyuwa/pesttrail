@@ -136,7 +136,8 @@ if df.empty:
     st.info("No visit data recorded yet. Data will appear here once visitors use the main dashboard.")
     st.stop()
 
-df["timestamp"] = pd.to_datetime(df["timestamp"])
+df["timestamp"] = pd.to_datetime(df["timestamp"], utc=True, errors="coerce")
+df = df.dropna(subset=["timestamp"])
 df["date"] = df["timestamp"].dt.date
 
 # --- KPIs ---
