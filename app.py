@@ -25,7 +25,21 @@ components.html("""
   window.dataLayer = window.dataLayer || [];
   function gtag(){dataLayer.push(arguments);}
   gtag('js', new Date());
-  gtag('config', 'G-9MKGHB8W6R', { send_page_view: true });
+  /* Use localStorage for stable client_id — survives cookie blocking in iframes */
+  var cid = null;
+  try {
+    cid = localStorage.getItem('pt_ga_cid');
+    if (!cid) {
+      cid = (Math.random().toString(36).slice(2)) + '.' + Date.now();
+      localStorage.setItem('pt_ga_cid', cid);
+      /* Explicitly fire first_visit for new users */
+      gtag('event', 'first_visit');
+    }
+  } catch(e) { cid = null; }
+  gtag('config', 'G-9MKGHB8W6R', {
+    send_page_view: true,
+    client_id: cid || undefined
+  });
 </script>
 <script>
 (function() {
@@ -69,7 +83,7 @@ components.html("""
   } catch(e) {}
 })();
 </script>
-""", height=0)
+""", height=1)
 
 # ── Server-side GA4 Measurement Protocol ─────────────────────────────────────
 def _ga4_pageview():
