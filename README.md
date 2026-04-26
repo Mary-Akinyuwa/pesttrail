@@ -1,6 +1,6 @@
 # PestTrail — US Invasive Pest Intelligence Platform
 
-**Built by [Mary Akinyuwa](https://www.linkedin.com/in/mary-akinyuwa-700268165/)** | Published Plant Pathologist · Food Systems & AI Strategist · Incoming MBA, Tepper School of Business at Carnegie Mellon University
+**Built by [Mary Akinyuwa](https://www.linkedin.com/in/mary-akinyuwa-700268165/)** | Published Plant Pathologist · Food Systems & AI Strategist
 
 ---
 
@@ -305,7 +305,7 @@ If you identify an error or have a more recent authoritative source for any figu
 
 **Mary Akinyuwa**
 
-Published plant pathologist. Field experience across Nigeria, Europe, and the United States. Former research scientist at Corteva Agriscience, where my work contributed to $51M+ in documented cost savings across crop protection programs. Incoming MBA candidate, Tepper School of Business at Carnegie Mellon University (Class of 2028). Consortium Fellow. Forte Fellow.
+Published plant pathologist. Field experience across Nigeria, Europe, and the United States. Former research scientist at Corteva Agriscience, where my work contributed to $51M+ in documented cost savings across crop protection programs.
 
 My research background is in fungal and bacterial plant pathogen characterization, molecular diagnostics, and surveillance system design. My current work sits at the intersection of food systems strategy, AI-powered agricultural intelligence, and the policy frameworks that govern how the US protects its agricultural and forest resources from biological threat.
 
