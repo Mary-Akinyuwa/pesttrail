@@ -724,6 +724,19 @@ button[aria-label="Manage app"] { display: none !important; }
 footer { visibility: hidden !important; height: 0 !important; overflow: hidden !important; }
 footer * { visibility: hidden !important; height: 0 !important; }
 button[kind="header"] { display: none !important; }
+
+/* ── Mobile main-area search input — white text + themed border ─── */
+@media (max-width: 768px) {
+    [data-testid="stMain"] [data-testid="stTextInput"] input {
+        color: #ffffff !important;
+        background: rgba(255,255,255,0.07) !important;
+        border: 1px solid rgba(134,178,51,0.35) !important;
+        border-radius: 4px !important;
+    }
+    [data-testid="stMain"] [data-testid="stTextInput"] input::placeholder {
+        color: rgba(255,255,255,0.45) !important;
+    }
+}
 </style>
 """
 st.markdown(CUSTOM_CSS, unsafe_allow_html=True)
@@ -1112,7 +1125,7 @@ st.sidebar.caption(f"Static dataset · last verified April 2026 · **{len(df)} r
 st.sidebar.markdown("---")
 
 st.sidebar.markdown(
-    "<p style='font-size:1.125rem;font-weight:700;color:#86B233;text-transform:uppercase;"
+    "<p style='font-size:1.125rem;font-weight:700;color:#ffffff;text-transform:uppercase;"
     "letter-spacing:0.09em;margin-bottom:2px;'>Species / Pathogen Search</p>",
     unsafe_allow_html=True
 )
