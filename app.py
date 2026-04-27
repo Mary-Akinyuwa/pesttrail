@@ -1,4 +1,5 @@
 import os
+import difflib
 import streamlit as st
 import streamlit.components.v1 as components
 import streamlit_analytics2 as streamlit_analytics
@@ -1177,15 +1178,30 @@ if "visit_logged" not in st.session_state:
 # ══════════════════════════════════════════════════════════════════════════════
 # FILTER LOGIC
 # ══════════════════════════════════════════════════════════════════════════════
+_is_fuzzy_match = False
 search_filtered = df.copy()
 if search_term and search_term.strip():
     q = search_term.strip()
-    # Search only pest names — prevents false positives from host/state/sector fields
     mask = (
         df["pest_common_name"].str.contains(q, case=False, na=False) |
         df["pest_scientific_name"].str.contains(q, case=False, na=False)
     )
     search_filtered = df[mask]
+    # Fuzzy fallback: if substring match finds nothing, suggest closest names
+    if search_filtered.empty:
+        _name_index = {}
+        for _idx, _row in df.iterrows():
+            for _col in ("pest_common_name", "pest_scientific_name"):
+                _val = _row.get(_col, "")
+                if isinstance(_val, str) and _val.strip():
+                    _name_index[_val.lower()] = _idx
+        _close = difflib.get_close_matches(
+            q.lower(), list(_name_index.keys()), n=6, cutoff=0.55
+        )
+        if _close:
+            _idxs = list(dict.fromkeys(_name_index[n] for n in _close))
+            search_filtered = df.loc[_idxs]
+            _is_fuzzy_match = True
 
 filtered = search_filtered.copy()
 if selected_type   != "All": filtered = filtered[filtered["pest_type"] == selected_type]
@@ -1297,9 +1313,13 @@ if search_term and search_term.strip():
             f'<div class="pdc-field-value">{_econ_val}{_year_badge}{_src_link}{_vpill}</div>'
             f'</div>'
         )
+        _result_label = (f'Closest match for <em>"{search_term}"</em>'
+                         if _is_fuzzy_match else f'Top result for <em>"{search_term}"</em>')
+        _count_label  = (f'Showing {len(filtered)} closest match(es) for "<em>{search_term}</em>"'
+                         if _is_fuzzy_match else f"Showing {len(filtered)} result(s) for '{search_term}'")
         st.markdown(f"""
         <div class="pdc-name" style="margin-top:20px;">
-          {pest_icon(r['pest_type'])} &nbsp;Top result for <em>"{search_term}"</em>
+          {pest_icon(r['pest_type'])} &nbsp;{_result_label}
         </div>
         <div class="pest-detail-card">
           <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;">
@@ -1318,7 +1338,7 @@ if search_term and search_term.strip():
           </div>
         </div>
         <p style="font-size:1.0625rem;color:#6b7280;margin-bottom:0;">
-          Showing {len(filtered)} result(s) for '{search_term}'
+          {_count_label}
         </p>
         """, unsafe_allow_html=True)
 
