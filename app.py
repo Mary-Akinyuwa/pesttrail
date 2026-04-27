@@ -997,7 +997,7 @@ def load_policy():
             "loss_ratio": "~297×", "roi_per_dollar": "~$17 (OTA 1993)",
             "plum_pox_cost_million": 65, "plum_pox_avoided_billion": 4.7,
             "plum_pox_roi": "~72×", "eradication_window_years": 5,
-            "sources": ["Fantle-Lepczyk et al. 2022 Sci. Total Environ. 819:153048", "USDA APHIS FY2025 PPA §7721 Spending Plan"]
+            "sources": ["Fantle-Lepczyk et al. 2022 Sci. Total Environ. 806:151318", "USDA APHIS FY2025 PPA §7721 Spending Plan"]
         },
         "sector_vulnerability": [],
         "threat_intel": {}
@@ -1426,7 +1426,7 @@ _PCFG = dict(displayModeBar=False, responsive=True)
 with tab_policy:
     # ══════════════════════════════════════════════════════════════════════════════
     # POLICY GAP  — The site's most shareable single number
-    # Sources: Fantle-Lepczyk et al. 2022 Sci. Total Environ. 819:153048 · USDA APHIS FY2025 PPA §7721
+    # Sources: Fantle-Lepczyk et al. 2022 Sci. Total Environ. 806:151318 · USDA APHIS FY2025 PPA §7721
     #          Diagne et al. 2021 Nature 592:571-576 · USDA ERS · Bee Informed Partnership 2024-25
     # ══════════════════════════════════════════════════════════════════════════════
     _pol = load_policy()
@@ -1439,7 +1439,7 @@ with tab_policy:
     section_header("⚖️", "Federal Investment vs. Documented Economic Damage",
                    f"Observed US invasive pest damage: ~{_damage_label}/year · USDA APHIS EDRR prevention appropriation: ~{_prev_label}/year · loss ratio quantifies the structural underinvestment in early detection and rapid response{_updated_str}")
 
-    _src_footnote = "Fantle-Lepczyk et al. 2022 Sci. Total Environ. 819:153048 · USDA APHIS FY2025 Congressional Justification PPA §7721 · Liebhold &amp; Tobin (2008) Annu. Rev. Entomol. 53:387–408"
+    _src_footnote = "Fantle-Lepczyk et al. 2022 Sci. Total Environ. 806:151318 · USDA APHIS FY2025 Congressional Justification PPA §7721 · Liebhold &amp; Tobin (2008) Annu. Rev. Entomol. 53:387–408"
 
     _roi_label  = str(_pg.get('roi_per_dollar','$17')).split('(')[0].strip()
     _pox_roi    = _pg.get('plum_pox_roi','80×')
@@ -1604,7 +1604,7 @@ with tab_policy:
         "Annual New Detections & Cumulative Established Invasive Species (1993–2025)",
         "Bars show new invasive species confirmed in the US each year; the overlaid line tracks the cumulative count of established species since 1993.",
         "Detection data: USDA-APHIS / USGS US-RIIS (verified April 2026) · One pre-1993 record (1951) excluded from chart, included in cumulative total · "
-        "Sources: Fantle-Lepczyk et al. 2022 Sci. Total Environ. 819:153048 · USDA APHIS FY2025 CJ PPA §7721 · "
+        "Sources: Fantle-Lepczyk et al. 2022 Sci. Total Environ. 806:151318 · USDA APHIS FY2025 CJ PPA §7721 · "
         "Liebhold & Tobin (2008) Annu. Rev. Entomol. 53:387–408 · OTA 1993 OTA-F-565"
     )
     st.plotly_chart(_fig_trend, use_container_width=True, config=_PCFG)
@@ -1963,7 +1963,7 @@ with tab_sector:
         {"Sector":"Citrus","Key Pests":"HLB, Citrus Canker, Citrus Black Spot","Damage/yr":"$9.4B",
          "States at Risk":"FL, CA, TX, AZ","Risk Level":"CRITICAL","Source":"USDA ERS EIB-219","color":"#ef4444"},
         {"Sector":"Hardwood Forestry","Key Pests":"EAB, ALB, HWA, SOD","Damage/yr":"$7.8B+",
-         "States at Risk":"38 states","Risk Level":"CRITICAL","Source":"Aukema et al. 2011 BioScience","color":"#ef4444"},
+         "States at Risk":"38 states","Risk Level":"CRITICAL","Source":"Aukema et al. 2011 PLOS ONE 6:e24587","color":"#ef4444"},
         {"Sector":"Soybeans","Key Pests":"Asian Soybean Rust, Soybean Aphid","Damage/yr":"$2.4B",
          "States at Risk":"Midwest, Southeast","Risk Level":"HIGH","Source":"USDA NASS","color":"#f97316"},
     ]
@@ -2071,13 +2071,13 @@ f'</div>', unsafe_allow_html=True)
         "Wheat Blast": {
             "risk": "CRITICAL", "pathway": "Contaminated seed / wind dispersal",
             "if_established": "$3B-$10B/yr wheat losses (CIMMYT 2022)",
-            "source": "Cruz et al. 2016 Science · CIMMYT Wheat Blast Alert",
+            "source": "Islam et al. 2016 BMC Biology 14:84 · CIMMYT Wheat Blast Alert 2022",
             "color": "#ef4444"
         },
         "Wheat Stem Rust Ug99": {
             "risk": "CRITICAL", "pathway": "Wind-borne urediniospores from East Africa",
             "if_established": "$1.5B-$3B/yr — affects ~84% of US hard red spring wheat varieties (USDA ARS 2024)",
-            "source": "Singh et al. 2008 Science 320:730 · Figueroa et al. 2024 Mol. Plant · BGRI 2024",
+            "source": "Singh et al. 2008 Adv. Agronomy 98:271-309 · BGRI 2024",
             "color": "#ef4444"
         },
     }

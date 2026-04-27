@@ -36,7 +36,7 @@ PestTrail's **Pathway Hotspot Analysis** is the first public step toward answeri
 
 Federal surveillance programs are evaluated on detections per unit time: how many new pests were found, how many survey plots were visited, how quickly a response was mounted after confirmation. What they are never evaluated on is: *how long before we found it?*
 
-Detection lag — the interval between estimated arrival and confirmed detection — is the most direct measure of surveillance system performance. A program that detects pests with a mean lag of 8 years is functionally failing, regardless of how many detections it records annually. Yet this metric does not appear in any USDA program evaluation framework I am aware of. It is not tracked. It is not reported. It is not used to allocate resources.
+Detection lag — the interval between estimated arrival and confirmed detection — is the most direct measure of surveillance system performance. A program that detects pests with a mean lag of 8 years is functionally failing, regardless of how many detections it records annually. Yet detection lag does not appear as a standardized metric in published USDA surveillance program evaluations — which typically report detections per survey plot, response time after confirmation, and treatment acreage, but not the interval between estimated arrival and first confirmed detection.
 
 PestTrail makes detection lag a first-class analytical variable. For every pest in the database, the platform captures estimated arrival year alongside confirmed detection year, calculates the lag, and enables comparison across pest types, entry pathways, and origin regions. The aggregate pattern — which pest categories consistently evade detection longest, and via which routes — is the information needed to redesign surveillance architecture toward the threats most likely to be already present but unconfirmed.
 
@@ -52,7 +52,7 @@ PestTrail's **Eradication Scorecard** tracks every pest record against its eradi
 
 ### Gap 4 — Economic Damage Cannot Be Attributed to Pathway Failures
 
-The US absorbs an estimated $40 billion annually in invasive species damage across agriculture, forestry, urban infrastructure, and ecosystem services. This figure is cited frequently. It is almost never attributed to specific pathway failures — because the pathway data that would enable that attribution does not exist in a public, analyzable form.
+The US absorbs an estimated $21 billion annually in invasive species damage across agriculture, forestry, urban infrastructure, and ecosystem services (Fantle-Lepczyk et al., *Science of the Total Environment*, 2022). This figure is cited frequently. It is almost never attributed to specific pathway failures — because the pathway data that would enable that attribution does not exist in a public, analyzable form.
 
 Attribution matters because it is the precondition for cost-benefit analysis of prevention investment. The argument for significantly increasing inspection intensity of solid wood packing materials from East Asia — beyond the $75 million annual federal allocation for all plant pest prevention programs — requires demonstrating that this pathway is responsible for a calculable share of identifiable damage. That calculation requires pathway-attributable damage data.
 
@@ -74,17 +74,17 @@ PestTrail's **Threat Horizon** section tracks these and future at-risk pathogens
 
 | Metric | Figure | Source |
 |---|---|---|
-| Annual US economic damage, invasive species | **$40 billion/year** | USDA |
+| Annual US economic damage, invasive species | **~$21 billion/year** | Fantle-Lepczyk et al., *Sci. Total Environ.*, 2022 |
 | Annual federal investment in plant pest prevention | **$75 million/year** | USDA APHIS FY2025, PPA §7721 |
-| Cumulative US losses (1960–2020) | **$1.22 trillion** | Diagne et al., *Science of the Total Environment*, 2022 |
-| Global annual cost | **$423 billion/year** | UN Environment Programme, 2023 |
-| EAB — urban tree loss | **$10.7 billion** | Kovacs et al., USFS, 2010 |
-| Citrus Greening (HLB) — FL citrus losses | **$4.5+ billion** | UF/IFAS FE903; FDACS |
+| Cumulative US losses (1960–2020) | **$1.22 trillion** | Fantle-Lepczyk et al., *Science of the Total Environment*, 2022 |
+| Global annual cost | **$423 billion/year** | IPBES Thematic Assessment on Invasive Alien Species, 2023 |
+| EAB — urban tree loss | **$10.7 billion** | Kovacs et al., Ecological Economics, 2010 |
+| Citrus Greening (HLB) — FL citrus losses | **$3.6+ billion (through 2011)** | Hodges & Spreen, UF/IFAS FE903, 2012 |
 | Citrus Greening — FL orange production decline | **74%+ since 2005; 90%+ by 2025** | FDACS; USDA ERS |
 | Citrus Canker eradication program cost | **$1.4 billion+** | USDA APHIS; Federal Register 2006 |
 | ALB — potential urban forest loss | **$669 billion** | Nowak et al., 2001 |
 
-**The spending-damage gap:** The federal government spends $75 million per year on plant pest prevention while absorbing $40 billion per year in damage. That is a 533:1 loss ratio. No private sector risk management framework would accept that ratio without a fundamental re-examination of the prevention architecture. The academic and policy case for rebalancing this ratio is unambiguous. The analytical infrastructure to make that case has not existed. PestTrail is part of building it.
+**The spending-damage gap:** The federal government spends $75 million per year on plant pest prevention while absorbing an estimated $21 billion per year in damage — a ~280:1 gap between prevention investment and realized losses. The analytical case for examining this ratio is grounded in peer-reviewed economic literature. PestTrail is part of building the evidence base to support that examination.
 
 ---
 
@@ -170,13 +170,13 @@ Pests not yet established in the continental US, tracked against the pathway and
 
 | Pest | Estimated Arrival | Confirmed Detection | Lag | Origin | Pathway | Verified Impact |
 |---|---|---|---|---|---|---|
-| Emerald Ash Borer | ~1992 | 2002 | **10 yr** | China | Solid wood packing | $10.7B — Kovacs et al., USFS 2010 |
+| Emerald Ash Borer | ~1992 | 2002 | **10 yr** | China | Solid wood packing | $10.7B — Kovacs et al., Ecological Economics, 2010 |
 | Spotted Lanternfly | ~2012 | 2014 | 2 yr | China/S. Korea | Stone shipment (egg masses) | $324.9M/yr potential statewide PA — Penn State 2019 |
-| Brown Marmorated Stink Bug | ~1996 | 1998 | 2 yr | China | Shipping containers | $37M/yr agricultural — USDA ARS |
-| Citrus Greening (HLB) | ~late 1990s | 2005 (disease FL) | 5–7 yr | South/SE Asia | Ornamental citrus nursery stock | $4.5B+ FL losses — UF/IFAS FE903 |
+| Brown Marmorated Stink Bug | ~1996 | 1998 | 2 yr | China | Shipping containers | $37M apple crop loss, Mid-Atlantic 2010 — U.S. Apple Association |
+| Citrus Greening (HLB) | ~late 1990s | 2005 (disease FL) | 5–7 yr | South/SE Asia | Ornamental citrus nursery stock | $3.6B+ FL losses through 2011 — Hodges & Spreen, UF/IFAS FE903, 2012 |
 | Asian Longhorned Beetle | ~early 1990s | 1996 | ~4 yr | China | Wooden crating | $669B potential urban forest — Nowak et al. 2001 |
 | Citrus Canker | 1994–1995 | 1995 | 0 yr | Asia | Nursery stock | $1.4B+ eradication cost — USDA APHIS |
-| Spotted Wing Drosophila | 2008 | 2008 | 0 yr | East Asia | Produce/trade | $1.275B/yr national — USDA 2022 |
+| Spotted Wing Drosophila | 2008 | 2008 | 0 yr | East Asia | Produce/trade | $1.275B/yr national crop losses — UMaine/USDA NIFA, 2022 |
 | Plum Pox Virus | 1999 | 1999 | 0 yr | Europe (Bulgaria) | Nursery budwood | $6.3B stone fruit industry protected — USDA APHIS |
 | N. Giant Hornet | 2019 | 2019 | 0 yr | East Asia | Shipping cargo | Eradicated Dec 2024; $15B+ pollination services at risk |
 | Asian Soybean Rust | 2004 | 2004 | 0 yr | Asia via S. America | Hurricane Ivan atmospheric dispersal | $240M–$2B/yr potential — USDA ERS |

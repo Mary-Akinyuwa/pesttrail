@@ -1,7 +1,7 @@
 {
   "_metadata": {
     "last_updated": "2026-04-15",
-    "update_source": "Fantle-Lepczyk et al. 2022 Sci. Total Environ. 819:153048 · USDA APHIS FY2025 PPA 7721 Spending Plan · Diagne et al. 2021 Nature 592:571-576 · USDA ERS Fruit and Tree Nuts Outlook 2024 · USDA FS FHP Annual Report 2022 · Bandara et al. 2025 Plant Dis. · USDA ERS Wheat Outlook 2024 · Harper et al. 2019 Penn State Ext. · Bee Informed Partnership 2024-25",
+    "update_source": "Fantle-Lepczyk et al. 2022 Sci. Total Environ. 806:151318 · USDA APHIS FY2025 PPA 7721 Spending Plan · Diagne et al. 2021 Nature 592:571-576 · USDA ERS Fruit and Tree Nuts Outlook 2024 · USDA FS FHP Annual Report 2022 · Bandara et al. 2025 Plant Dis. · USDA ERS Wheat Outlook 2024 · Harper et al. 2019 Penn State Ext. · Bee Informed Partnership 2024-25",
     "next_review": "2027-01-01",
     "agent_version": "3.0",
     "sanity_check": "PestTrail Sanity Check Agent — 20/20 claims verified April 2026"
@@ -18,7 +18,7 @@
     "plum_pox_roi": "~72×",
     "eradication_window_years": 5,
     "sources": [
-      "Fantle-Lepczyk et al. 2022 Sci. Total Environ. 819:153048 (US observed costs 1960–2020)",
+      "Fantle-Lepczyk et al. 2022 Sci. Total Environ. 806:151318 (US observed costs 1960–2020)",
       "USDA APHIS FY2025 PPA §7721 Spending Plan (prevention budget — EDRR line item)",
       "Diagne et al. 2021 Nature 592:571-576 (InvaCost global database)",
       "Liebhold & Tobin 2008 Annu. Rev. Entomol. 53:387-408 (eradication window)",
@@ -52,7 +52,7 @@
       "states_at_risk": "Midwest, Southeast",
       "risk_level": "HIGH",
       "color": "#f97316",
-      "source": "Bandara et al. 2025 Plant Dis. (avg. 2020-2024 soybean disease losses)"
+      "source": "Bandara et al. 2020 PLOS ONE 15:e0231141 (avg. annual soybean disease losses 1996-2016)"
     },
     {
       "sector": "Wheat & Grains",
@@ -87,28 +87,28 @@
       "risk": "CRITICAL",
       "pathway": "Contaminated seed / wind dispersal",
       "if_established": "$3B-$10B/yr wheat losses (CIMMYT 2022)",
-      "source": "Cruz et al. 2016 Science 352:730-733 · CIMMYT Wheat Blast Alert 2022",
+      "source": "Islam et al. 2016 BMC Biology 14:84 · CIMMYT Wheat Blast Alert 2022",
       "color": "#ef4444"
     },
     "Wheat Stem Rust Ug99": {
       "risk": "CRITICAL",
       "pathway": "Wind-borne urediniospores from East Africa",
       "if_established": "$1.5B-$3B/yr — affects ~84% of US hard red spring wheat varieties (USDA ARS 2024); susceptibility reduced from ~90% through BGRI/CIMMYT resistance breeding programs",
-      "source": "Singh et al. 2008 Science 320:730 · Figueroa et al. 2024 Mol. Plant · BGRI 2024",
+      "source": "Singh et al. 2008 Adv. Agronomy 98:271-309 · BGRI 2024",
       "color": "#ef4444"
     },
     "Wheat Stem Rust Race Ug99": {
       "risk": "CRITICAL",
       "pathway": "Wind-borne urediniospores from East Africa",
       "if_established": "$1.5B-$3B/yr — affects ~84% of US hard red spring wheat varieties (USDA ARS 2024); susceptibility reduced from ~90% through BGRI/CIMMYT resistance breeding programs",
-      "source": "Singh et al. 2008 Science 320:730 · Figueroa et al. 2024 Mol. Plant · BGRI 2024",
+      "source": "Singh et al. 2008 Adv. Agronomy 98:271-309 · BGRI 2024",
       "color": "#ef4444"
     },
     "Tropilaelaps Mite": {
       "risk": "HIGH",
       "pathway": "Imported honey bee packages / queens",
       "if_established": "$500M-$1B/yr pollination services at risk",
-      "source": "Anderson & Morgan 2007 Exp. Appl. Acarol. 43:171-193",
+      "source": "Anderson & Morgan 2007 Exp. Appl. Acarol. 43:1-24",
       "color": "#f97316"
     },
     "Citrus Black Spot": {
