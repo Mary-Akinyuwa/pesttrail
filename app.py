@@ -359,17 +359,22 @@ section[data-testid="stSidebar"] .stSelectbox > div > div {
     color: #ffffff !important;
 }
 section[data-testid="stSidebar"] .stButton button {
-    background: #86B233 !important;
-    color: #ffffff !important;
-    border: none !important;
-    border-radius: 4px !important;
-    font-family: 'Oswald', sans-serif !important;
-    font-weight: 600 !important;
-    letter-spacing: 0.05em !important;
-    width: 100% !important;
+    background: transparent !important;
+    color: #7a9ab0 !important;
+    border: 1px solid rgba(122,154,176,0.25) !important;
+    border-radius: 3px !important;
+    font-family: 'Roboto', sans-serif !important;
+    font-weight: 400 !important;
+    font-size: 0.7rem !important;
+    letter-spacing: 0.02em !important;
+    width: auto !important;
+    padding: 2px 10px !important;
+    min-height: unset !important;
 }
 section[data-testid="stSidebar"] .stButton button:hover {
-    background: #6e9428 !important;
+    color: #b8d8ec !important;
+    border-color: rgba(184,216,236,0.4) !important;
+    background: transparent !important;
 }
 section[data-testid="stSidebar"] hr {
     border-color: rgba(134,178,51,0.25) !important;
@@ -1120,9 +1125,9 @@ st.sidebar.markdown("""
 <p style='font-size:0.75rem;color:#b8d8ec;margin-top:0;margin-bottom:0;'>US Biosurveillance · Pests &amp; Pathogens · 1995–2026</p>
 """, unsafe_allow_html=True)
 
-if st.sidebar.button("🔄 Reload Dataset"):
-    st.cache_data.clear(); st.rerun()
 st.sidebar.caption(f"Static dataset · last verified April 2026 · **{len(df)} records**")
+if st.sidebar.button("↻ Reload dataset"):
+    st.cache_data.clear(); st.rerun()
 st.sidebar.markdown("---")
 
 st.sidebar.markdown(
