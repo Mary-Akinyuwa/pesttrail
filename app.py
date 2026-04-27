@@ -1131,7 +1131,7 @@ st.sidebar.markdown(
 )
 search_term = st.sidebar.text_input(
     "Search by common name, scientific name, host, or state",
-    placeholder="e.g. Agrilus planipennis, soybean, Florida…",
+    placeholder="e.g. emerald ash borer or Agrilus planipennis…",
     key="search_input",
     label_visibility="collapsed"
 )
@@ -1160,6 +1160,14 @@ selected_record_type = st.sidebar.selectbox("Record Type", record_types)
 
 eradication_statuses = ["All"] + sorted(df["eradication_status"].dropna().unique().tolist())
 selected_status    = st.sidebar.selectbox("Eradication Status", eradication_statuses)
+
+# On mobile the search box is rendered in the main area after the sidebar,
+# so its session_state value must be read here — before filter logic — or
+# the filter runs on an empty search_term and results are never narrowed.
+if is_mobile:
+    _mob_val = st.session_state.get("mobile_search_input", "").strip()
+    if _mob_val:
+        search_term = _mob_val
 
 if "visit_logged" not in st.session_state:
     st.session_state.visit_logged = True
@@ -1201,14 +1209,12 @@ if is_mobile:
         'Species / Pathogen Search</p>',
         unsafe_allow_html=True
     )
-    _mobile_search = st.text_input(
+    st.text_input(
         "Search",
-        placeholder="e.g. emerald ash borer, soybean, Florida…",
+        placeholder="e.g. emerald ash borer or Agrilus planipennis…",
         key="mobile_search_input",
         label_visibility="collapsed"
     )
-    if _mobile_search and _mobile_search.strip():
-        search_term = _mobile_search
 
 # ══════════════════════════════════════════════════════════════════════════════
 # SEARCH RESULT DETAIL CARD
@@ -1237,7 +1243,11 @@ if search_term and search_term.strip():
         </div>
         """, unsafe_allow_html=True)
     else:
-        exact = filtered[filtered["pest_common_name"].str.lower() == search_term.strip().lower()]
+        _q_lower = search_term.strip().lower()
+        exact = filtered[
+            (filtered["pest_common_name"].str.lower() == _q_lower) |
+            (filtered["pest_scientific_name"].str.lower() == _q_lower)
+        ]
         r = exact.iloc[0] if not exact.empty else filtered.iloc[0]
         status = r.get("eradication_status", "")
         bcls = {"Eradicated":"badge-green","Eradication Ongoing":"badge-yellow",
