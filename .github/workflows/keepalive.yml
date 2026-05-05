@@ -2,13 +2,17 @@ name: Keep PestTrail Awake
 
 on:
   schedule:
-    # Ping every 24 hours — well within Streamlit's sleep threshold
-    - cron: '0 10 * * *'
+    # Ping 4× per day — if one GitHub runner slot is unavailable, the others cover it
+    - cron: '0 6  * * *'
+    - cron: '0 12 * * *'
+    - cron: '0 18 * * *'
+    - cron: '0 0  * * *'
   workflow_dispatch:  # allow manual trigger from GitHub Actions tab
 
 jobs:
   ping:
     runs-on: ubuntu-latest
+    timeout-minutes: 5  # fail fast if no runner is available; don't hang 15+ min
     steps:
       - name: Wake PestTrail
         run: |
