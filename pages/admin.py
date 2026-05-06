@@ -23,8 +23,11 @@ def _secret(key, default=""):
     except Exception:
         return os.getenv(key, default)
 
-_SB_URL = _secret("SUPABASE_URL")
-_SB_KEY = _secret("SUPABASE_ANON_KEY")
+_SB_URL  = _secret("SUPABASE_URL")
+_SB_KEY  = _secret("SUPABASE_ANON_KEY")
+# Service role key bypasses RLS — required for admin SELECT after RLS is enabled.
+# Add SUPABASE_SERVICE_KEY to Streamlit Secrets (never commit it to GitHub).
+_SB_SVCKEY = _secret("SUPABASE_SERVICE_KEY", "")
 
 # --- Auth gate ---
 st.title("🔒 PestTrail Admin")
@@ -112,9 +115,12 @@ if _using_supabase:
 def load_visits():
     if _using_supabase:
         try:
+            # Use service role key for SELECT so RLS doesn't block admin reads.
+            # Falls back to anon key if service key not yet configured.
+            _read_key = _SB_SVCKEY if _SB_SVCKEY else _SB_KEY
             resp = _req.get(
                 f"{_SB_URL}/rest/v1/visits?select=*&order=timestamp.desc&limit=10000",
-                headers={"apikey": _SB_KEY, "Authorization": f"Bearer {_SB_KEY}"},
+                headers={"apikey": _read_key, "Authorization": f"Bearer {_read_key}"},
                 timeout=5
             )
             if resp.ok:
