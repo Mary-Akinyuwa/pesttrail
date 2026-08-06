@@ -1,29 +1,186 @@
 name: Keep PestTrail Awake
 
+# Why a real browser and not curl:
+# https://pesttrail.streamlit.app/ answers a bare GET with "303 -> share.streamlit.io/-/auth/app".
+# curl sees 3xx and reports success while never loading the app. Streamlit Community Cloud
+# measures activity by the websocket a rendered page opens, so an HTTP fetch never counts as
+# a visit and can never click the "Yes, get this app back up!" button on the sleep screen.
+
 on:
   schedule:
-    # Ping 4× per day — if one GitHub runner slot is unavailable, the others cover it
-    - cron: '0 6  * * *'
-    - cron: '0 12 * * *'
-    - cron: '0 18 * * *'
-    - cron: '0 0  * * *'
-  workflow_dispatch:  # allow manual trigger from GitHub Actions tab
+    # Every 4 hours. Each job then sleeps a random 0-45 min, so the actual visit
+    # time drifts daily instead of hitting the same clock minute every day.
+    - cron: '0 1  * * *'
+    - cron: '0 5  * * *'
+    - cron: '0 9  * * *'
+    - cron: '0 13 * * *'
+    - cron: '0 17 * * *'
+    - cron: '0 21 * * *'
+  workflow_dispatch:
+    inputs:
+      skip_jitter:
+        description: 'Skip the random delay (for manual test runs)'
+        type: boolean
+        default: true
+
+permissions:
+  contents: write  # heartbeat commit, see the keep-schedule-alive job
+
+env:
+  APP_URL: https://pesttrail.streamlit.app/
 
 jobs:
-  ping:
+  wake:
     runs-on: ubuntu-latest
-    timeout-minutes: 5  # fail fast if no runner is available; don't hang 15+ min
+    timeout-minutes: 60  # must exceed max jitter (45m) + cold start
+
     steps:
-      - name: Wake PestTrail
+      - name: Random delay
+        if: github.event_name == 'schedule' || inputs.skip_jitter == false
         run: |
-          echo "Pinging pesttrail.streamlit.app..."
-          STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
-            --max-time 30 \
-            -A "Mozilla/5.0 (compatible; keepalive-bot)" \
-            https://pesttrail.streamlit.app/)
-          echo "HTTP status: $STATUS"
-          if [ "$STATUS" -ge 200 ] && [ "$STATUS" -lt 400 ]; then
-            echo "App is responding."
-          else
-            echo "Warning: unexpected status $STATUS"
+          DELAY=$((RANDOM % 2700))
+          echo "Sleeping ${DELAY}s (~$((DELAY / 60)) min) so the visit time varies day to day."
+          sleep "$DELAY"
+
+      - name: Install Playwright
+        run: |
+          npm install --no-save playwright@1.49.1
+          npx playwright install --with-deps chromium
+
+      - name: Visit app and wake it if asleep
+        run: |
+          cat > keepalive.js <<'EOF'
+          const { chromium } = require('playwright');
+
+          const URL = process.env.APP_URL;
+          const WAKE_RE = /get this app back up|back up!?$/i;
+          const SLEEP_RE = /gone to sleep|has gone to sleep due to inactivity/i;
+          // Rendered proof the real app loaded, not the auth shim or the sleep screen.
+          const APP_MARKER = /PestTrail/i;
+
+          const log = (m) => console.log(`[keepalive] ${m}`);
+
+          (async () => {
+            const browser = await chromium.launch();
+            const context = await browser.newContext({
+              userAgent:
+                'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 ' +
+                '(KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
+              viewport: { width: 1440, height: 900 },
+            });
+            const page = await context.newPage();
+
+            let wokeIt = false;
+            let ok = false;
+
+            try {
+              log(`Opening ${URL}`);
+              const res = await page.goto(URL, { waitUntil: 'domcontentloaded', timeout: 90000 });
+              log(`Landed on ${page.url()} (status ${res ? res.status() : 'n/a'})`);
+
+              // The sleep screen can render a beat after DOM load.
+              await page.waitForTimeout(5000);
+
+              const bodyText = await page.innerText('body').catch(() => '');
+              if (SLEEP_RE.test(bodyText) || WAKE_RE.test(bodyText)) {
+                log('App is ASLEEP - looking for the wake button.');
+
+                // Button may sit in the top frame or in an embedded frame.
+                for (const frame of page.frames()) {
+                  const btn = frame.getByRole('button', { name: WAKE_RE }).first();
+                  if (await btn.count().catch(() => 0)) {
+                    await btn.click({ timeout: 15000 });
+                    wokeIt = true;
+                    log('Clicked the wake button.');
+                    break;
+                  }
+                }
+
+                if (!wokeIt) {
+                  const anyBtn = page.locator('button', { hasText: WAKE_RE }).first();
+                  if (await anyBtn.count().catch(() => 0)) {
+                    await anyBtn.click({ timeout: 15000 });
+                    wokeIt = true;
+                    log('Clicked the wake button (text fallback).');
+                  }
+                }
+
+                if (!wokeIt) log('Sleep text present but no wake button found - waiting anyway.');
+              }
+
+              // Cold boot after a wake click routinely takes 60-90s.
+              log('Waiting for the app to render...');
+              await page
+                .waitForFunction(
+                  (src) => new RegExp(src, 'i').test(document.body.innerText),
+                  APP_MARKER.source,
+                  { timeout: 150000, polling: 3000 }
+                )
+                .then(() => { ok = true; })
+                .catch(() => { ok = false; });
+
+              if (ok) {
+                // Hold the websocket open so Streamlit logs a genuine session,
+                // not a load-and-bounce.
+                log('App rendered. Holding the session open for 45s.');
+                for (let i = 0; i < 9; i++) {
+                  await page.mouse.move(300 + i * 40, 300 + i * 20);
+                  await page.waitForTimeout(5000);
+                }
+              }
+            } catch (err) {
+              log(`ERROR: ${err.message}`);
+            } finally {
+              await page.screenshot({ path: 'result.png', fullPage: false }).catch(() => {});
+              const finalText = await page.innerText('body').catch(() => '');
+              log(`Final URL: ${page.url()}`);
+              log(`First 300 chars: ${finalText.slice(0, 300).replace(/\s+/g, ' ')}`);
+              await browser.close();
+            }
+
+            log(`RESULT: awake=${ok} woke_from_sleep=${wokeIt}`);
+            if (!ok) {
+              log('FAILED - the app never rendered. See the result.png artifact.');
+              process.exit(1);
+            }
+            log('SUCCESS - PestTrail is awake.');
+          })();
+          EOF
+          node keepalive.js
+
+      - name: Upload screenshot
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: keepalive-screenshot-${{ github.run_id }}-${{ github.run_attempt }}
+          path: result.png
+          if-no-files-found: ignore
+          retention-days: 7
+
+  # GitHub disables scheduled workflows after 60 days with no repository activity.
+  # That is what silently killed this workflow on 2026-07-05 (last push 2026-05-06).
+  # An empty commit every ~45 days resets that clock so the schedule never lapses again.
+  keep-schedule-alive:
+    runs-on: ubuntu-latest
+    needs: wake
+    if: always() && github.event_name == 'schedule'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Heartbeat commit if the repo has been quiet for 45+ days
+        run: |
+          LAST=$(git log -1 --format=%ct)
+          NOW=$(date +%s)
+          DAYS=$(( (NOW - LAST) / 86400 ))
+          echo "Last commit was ${DAYS} days ago."
+          if [ "$DAYS" -lt 45 ]; then
+            echo "Recent enough. GitHub will not disable the schedule."
+            exit 0
           fi
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit --allow-empty -m "chore: keepalive heartbeat (prevent scheduled workflow auto-disable)"
+          git push
+          echo "Heartbeat pushed. 60-day inactivity clock reset."
