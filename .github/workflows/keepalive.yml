@@ -1,10 +1,18 @@
 name: Keep PestTrail Awake
 
 # Why a real browser and not curl:
-# https://pesttrail.streamlit.app/ answers a bare GET with "303 -> share.streamlit.io/-/auth/app".
-# curl sees 3xx and reports success while never loading the app. Streamlit Community Cloud
-# measures activity by the websocket a rendered page opens, so an HTTP fetch never counts as
-# a visit and can never click the "Yes, get this app back up!" button on the sleep screen.
+#   A bare GET to pesttrail.streamlit.app answers "303 -> share.streamlit.io/-/auth/app".
+#   The old version treated any status < 400 as success, so it logged "App is responding"
+#   while never loading the app. Streamlit Community Cloud also measures activity by the
+#   websocket a rendered page opens, so an HTTP fetch never counts as a visit, and curl
+#   cannot click the "Yes, get this app back up!" button once the app is already asleep.
+#
+# Why readiness is checked inside an iframe:
+#   Community Cloud serves the real app in a NESTED IFRAME at <app>.streamlit.app/~/+/.
+#   The top-level document is only a wrapper shell whose body.innerText is always empty,
+#   so checking the top frame would report a perfectly healthy app as dead. The sleep
+#   screen, by contrast, IS rendered in the top frame. Detect sleep up top, verify
+#   readiness in the app frame.
 
 on:
   schedule:
@@ -53,12 +61,40 @@ jobs:
           const { chromium } = require('playwright');
 
           const URL = process.env.APP_URL;
-          const WAKE_RE = /get this app back up|back up!?$/i;
-          const SLEEP_RE = /gone to sleep|has gone to sleep due to inactivity/i;
-          // Rendered proof the real app loaded, not the auth shim or the sleep screen.
-          const APP_MARKER = /PestTrail/i;
+          const WAKE_RE = /get this app back up/i;
+          const SLEEP_RE = /gone to sleep|get this app back up/i;
+          const READY_TIMEOUT_MS = 240000;  // cold boot after a wake click is slow
+          const DWELL_MS = 45000;
 
           const log = (m) => console.log(`[keepalive] ${m}`);
+
+          // Re-enumerates frames on every call. The wake click navigates the page and
+          // recreates the app frame; anything bound to the old execution context throws
+          // "Execution context was destroyed", which must not be read as "app is down".
+          async function appFrameState(page) {
+            for (const frame of page.frames()) {
+              if (!/streamlit\.app/.test(frame.url())) continue;
+              try {
+                const r = await frame.evaluate(() => {
+                  const root = document.querySelector('[data-testid="stAppViewContainer"]');
+                  if (!root) return null;
+                  return { len: (root.innerText || '').trim().length };
+                });
+                if (r) return r;
+              } catch {
+                // Frame detached mid-evaluate; try the next frame / next poll.
+              }
+            }
+            return null;
+          }
+
+          async function topText(page) {
+            try {
+              return await page.evaluate(() => (document.body ? document.body.innerText || '' : ''));
+            } catch {
+              return '';
+            }
+          }
 
           (async () => {
             const browser = await chromium.launch();
@@ -77,53 +113,47 @@ jobs:
               log(`Opening ${URL}`);
               const res = await page.goto(URL, { waitUntil: 'domcontentloaded', timeout: 90000 });
               log(`Landed on ${page.url()} (status ${res ? res.status() : 'n/a'})`);
-
-              // The sleep screen can render a beat after DOM load.
               await page.waitForTimeout(5000);
 
-              const bodyText = await page.innerText('body').catch(() => '');
-              if (SLEEP_RE.test(bodyText) || WAKE_RE.test(bodyText)) {
+              if (SLEEP_RE.test(await topText(page))) {
                 log('App is ASLEEP - looking for the wake button.');
-
-                // Button may sit in the top frame or in an embedded frame.
                 for (const frame of page.frames()) {
                   const btn = frame.getByRole('button', { name: WAKE_RE }).first();
                   if (await btn.count().catch(() => 0)) {
-                    await btn.click({ timeout: 15000 });
+                    await btn.click({ timeout: 15000 }).catch((e) => log(`click issue: ${e.message}`));
                     wokeIt = true;
                     log('Clicked the wake button.');
                     break;
                   }
                 }
-
                 if (!wokeIt) {
                   const anyBtn = page.locator('button', { hasText: WAKE_RE }).first();
                   if (await anyBtn.count().catch(() => 0)) {
-                    await anyBtn.click({ timeout: 15000 });
+                    await anyBtn.click({ timeout: 15000 }).catch(() => {});
                     wokeIt = true;
                     log('Clicked the wake button (text fallback).');
                   }
                 }
-
-                if (!wokeIt) log('Sleep text present but no wake button found - waiting anyway.');
+                if (!wokeIt) log('Sleep screen up but no wake button matched - waiting anyway.');
               }
 
-              // Cold boot after a wake click routinely takes 60-90s.
-              log('Waiting for the app to render...');
-              await page
-                .waitForFunction(
-                  (src) => new RegExp(src, 'i').test(document.body.innerText),
-                  APP_MARKER.source,
-                  { timeout: 150000, polling: 3000 }
-                )
-                .then(() => { ok = true; })
-                .catch(() => { ok = false; });
+              log('Polling the app frame until Streamlit renders...');
+              const deadline = Date.now() + READY_TIMEOUT_MS;
+              let last = '';
+              while (Date.now() < deadline) {
+                const s = await appFrameState(page);
+                const desc = s ? `stAppViewContainer present, textLen=${s.len}` : 'app frame not ready';
+                if (desc !== last) { log(`  ${desc}`); last = desc; }
+                if (s && s.len > 200) { ok = true; break; }
+                await page.waitForTimeout(3000);
+              }
 
               if (ok) {
-                // Hold the websocket open so Streamlit logs a genuine session,
-                // not a load-and-bounce.
-                log('App rendered. Holding the session open for 45s.');
-                for (let i = 0; i < 9; i++) {
+                // Streamlit counts an open websocket session as activity, so stay on the
+                // page rather than loading and bouncing straight off.
+                log(`App rendered. Holding the session open for ${DWELL_MS / 1000}s.`);
+                const ticks = Math.floor(DWELL_MS / 5000);
+                for (let i = 0; i < ticks; i++) {
                   await page.mouse.move(300 + i * 40, 300 + i * 20);
                   await page.waitForTimeout(5000);
                 }
@@ -131,10 +161,10 @@ jobs:
             } catch (err) {
               log(`ERROR: ${err.message}`);
             } finally {
-              await page.screenshot({ path: 'result.png', fullPage: false }).catch(() => {});
-              const finalText = await page.innerText('body').catch(() => '');
+              await page.screenshot({ path: 'result.png' }).catch(() => {});
+              const s = await appFrameState(page);
               log(`Final URL: ${page.url()}`);
-              log(`First 300 chars: ${finalText.slice(0, 300).replace(/\s+/g, ' ')}`);
+              log(`Final app-frame textLen: ${s ? s.len : 'n/a'}`);
               await browser.close();
             }
 
