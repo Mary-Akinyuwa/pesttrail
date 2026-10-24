@@ -1140,21 +1140,6 @@ _last_ok = [m.get("last_success_utc", "") for m in load_agent_status().values() 
 _last_ok = pd.to_datetime(pd.Series(_last_ok, dtype=object), errors="coerce", utc=True, format="mixed").dropna()
 LAST_CHECKED = _fmt_day(_last_ok.max()) if not _last_ok.empty else ""
 
-VERIFICATION_LOG_PATH = Path(__file__).parent / "data" / "verification_log.csv"
-
-@st.cache_data(ttl=300)
-def load_recent_changes(n=8):
-    """Latest changes the agent published after two-pass verification (data/verification_log.csv)."""
-    try:
-        log_df = pd.read_csv(VERIFICATION_LOG_PATH, dtype=str, keep_default_na=False, on_bad_lines="skip")
-    except (OSError, ValueError, KeyError, pd.errors.EmptyDataError, pd.errors.ParserError):
-        return []
-    _req = {"date_utc", "subject", "field", "old_value", "new_value", "verdict", "evidence_url"}
-    if not _req.issubset(log_df.columns):
-        return []
-    done = log_df[(log_df["verdict"] == "confirmed")]
-    return done.iloc[::-1].head(n).to_dict("records")
-
 # ══════════════════════════════════════════════════════════════════════════════
 # SIDEBAR
 # ══════════════════════════════════════════════════════════════════════════════
@@ -1181,19 +1166,6 @@ if LAST_CHECKED:
     st.sidebar.caption(f"Agent-maintained · last checked {LAST_CHECKED} · records verified {VERIFIED_RANGE} · **{len(df)} records**")
 else:
     st.sidebar.caption(f"Records verified {VERIFIED_RANGE} · **{len(df)} records**")
-_recent = load_recent_changes()
-if _recent:
-    with st.sidebar.expander(f"Recent verified changes ({len(_recent)})"):
-        for _c in _recent:
-            # Values come from web research: render as plain text, never as HTML/markdown.
-            _what = (f"added · {_c['new_value']}" if _c["field"] == "new record"
-                     else f"{_c['field']}: {_c['old_value'] or '—'} → {_c['new_value']}")
-            st.text(f"{_c['subject']} — {_what}")
-            _url = _c["evidence_url"]
-            if re.match(r"^https?://[^\s<>()\[\]]+$", _url):
-                st.caption(f"{_c['date_utc']} · source: <{_url}>")
-            else:
-                st.caption(_c["date_utc"])
 if st.sidebar.button("↻ Reload dataset"):
     st.cache_data.clear(); st.rerun()
 st.sidebar.markdown("---")
