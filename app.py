@@ -1,5 +1,7 @@
 import os
 import difflib
+import re
+import html
 import streamlit as st
 import streamlit.components.v1 as components
 import streamlit_analytics2 as streamlit_analytics
@@ -938,7 +940,7 @@ def make_hero(n_records: int) -> str:
         font-weight:600;color:#86B233;letter-spacing:0.04em;">{n_records} SPECIES TRACKED</div>
       <div class="pt-hero-chip" style="background:rgba(17,106,171,0.18);border:1px solid rgba(17,106,171,0.7);
         border-radius:4px;padding:7px 18px;font-family:'Oswald',sans-serif;font-size:0.82rem;
-        font-weight:600;color:#116AAB;letter-spacing:0.04em;">1995 — 2026</div>
+        font-weight:600;color:#116AAB;letter-spacing:0.04em;">1995 — {YEAR_MAX}</div>
       <div class="pt-hero-chip" style="background:rgba(238,182,56,0.15);border:1px solid rgba(238,182,56,0.7);
         border-radius:4px;padding:7px 18px;font-family:'Oswald',sans-serif;font-size:0.82rem;
         font-weight:600;color:#EEB638;letter-spacing:0.04em;">PEER-REVIEWED</div>
@@ -1101,12 +1103,62 @@ def load_data():
         .str.replace(",","").astype(float, errors="ignore"))
     return df
 
+STATUS_PATH = Path(__file__).parent / "data" / "agent_status.json"
+
+@st.cache_data(ttl=300)
+def load_agent_status():
+    """Run history written by data_update_agent.py; {} until the agent has run."""
+    import json as _json
+    try:
+        with open(STATUS_PATH, "r", encoding="utf-8") as f:
+            _st = _json.load(f)
+    except (OSError, ValueError):
+        return {}
+    return _st if isinstance(_st, dict) else {}
+
+def _fmt_day(ts):
+    return f"{ts:%b} {ts.day}, {ts.year}"
+
+def _esc(v):
+    """HTML-escape any CSV/JSON/user value before it goes into unsafe_allow_html markup."""
+    return html.escape(str(v))
+
 df = load_data()
+
+# Verification dates come from the data itself, so the labels can't go stale.
+_vdates = pd.to_datetime(df["data_verified_date"], errors="coerce", format="mixed").dropna()
+if _vdates.empty:
+    VERIFIED_RANGE = "date unknown"
+elif (_vdates.min().year, _vdates.min().month) == (_vdates.max().year, _vdates.max().month):
+    VERIFIED_RANGE = f"{_vdates.max():%B %Y}"
+else:
+    VERIFIED_RANGE = f"{_vdates.min():%b %Y}–{_vdates.max():%b %Y}"
+# Upper year for labels/charts: this year, or later if the data already has a later record.
+_ymax_data = df["year_first_detected_us"].max()
+YEAR_MAX = max(datetime.now(timezone.utc).year, int(_ymax_data) if pd.notna(_ymax_data) else 0)
+_last_ok = [m.get("last_success_utc", "") for m in load_agent_status().values() if isinstance(m, dict)]
+_last_ok = pd.to_datetime(pd.Series(_last_ok, dtype=object), errors="coerce", utc=True, format="mixed").dropna()
+LAST_CHECKED = _fmt_day(_last_ok.max()) if not _last_ok.empty else ""
+
+VERIFICATION_LOG_PATH = Path(__file__).parent / "data" / "verification_log.csv"
+
+@st.cache_data(ttl=300)
+def load_recent_changes(n=8):
+    """Latest changes the agent published after two-pass verification (data/verification_log.csv)."""
+    try:
+        log_df = pd.read_csv(VERIFICATION_LOG_PATH, dtype=str, keep_default_na=False, on_bad_lines="skip")
+    except (OSError, ValueError, KeyError, pd.errors.EmptyDataError, pd.errors.ParserError):
+        return []
+    _req = {"date_utc", "subject", "field", "old_value", "new_value", "verdict", "evidence_url"}
+    if not _req.issubset(log_df.columns):
+        return []
+    done = log_df[(log_df["verdict"] == "confirmed")]
+    return done.iloc[::-1].head(n).to_dict("records")
 
 # ══════════════════════════════════════════════════════════════════════════════
 # SIDEBAR
 # ══════════════════════════════════════════════════════════════════════════════
-st.sidebar.markdown("""
+st.sidebar.markdown(f"""
 <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px;">
   <svg width="36" height="36" viewBox="0 0 36 36" xmlns="http://www.w3.org/2000/svg">
     <circle cx="18" cy="18" r="18" fill="#07334E" stroke="#86B233" stroke-width="1.5"/>
@@ -1122,10 +1174,26 @@ st.sidebar.markdown("""
   <span style="font-family:'Oswald',sans-serif;font-size:1.4rem;font-weight:700;
                color:#ffffff;letter-spacing:0.08em;">PEST<span style="font-size:1.05rem;color:#86B233;">TRAIL</span></span>
 </div>
-<p style='font-size:0.75rem;color:#b8d8ec;margin-top:0;margin-bottom:0;'>US Biosurveillance · Pests &amp; Pathogens · 1995–2026</p>
+<p style='font-size:0.75rem;color:#b8d8ec;margin-top:0;margin-bottom:0;'>US Biosurveillance · Pests &amp; Pathogens · 1995–{YEAR_MAX}</p>
 """, unsafe_allow_html=True)
 
-st.sidebar.caption(f"Static dataset · last verified April 2026 · **{len(df)} records**")
+if LAST_CHECKED:
+    st.sidebar.caption(f"Agent-maintained · last checked {LAST_CHECKED} · records verified {VERIFIED_RANGE} · **{len(df)} records**")
+else:
+    st.sidebar.caption(f"Records verified {VERIFIED_RANGE} · **{len(df)} records**")
+_recent = load_recent_changes()
+if _recent:
+    with st.sidebar.expander(f"Recent verified changes ({len(_recent)})"):
+        for _c in _recent:
+            # Values come from web research: render as plain text, never as HTML/markdown.
+            _what = (f"added · {_c['new_value']}" if _c["field"] == "new record"
+                     else f"{_c['field']}: {_c['old_value'] or '—'} → {_c['new_value']}")
+            st.text(f"{_c['subject']} — {_what}")
+            _url = _c["evidence_url"]
+            if re.match(r"^https?://[^\s<>()\[\]]+$", _url):
+                st.caption(f"{_c['date_utc']} · source: <{_url}>")
+            else:
+                st.caption(_c["date_utc"])
 if st.sidebar.button("↻ Reload dataset"):
     st.cache_data.clear(); st.rerun()
 st.sidebar.markdown("---")
@@ -1253,7 +1321,7 @@ if search_term and search_term.strip():
         <div style="background:#fff7ed;border-left:5px solid #f59e0b;border-radius:0 8px 8px 0;
                     padding:16px 20px;margin:16px 0;">
           <div style="font-family:'Oswald',sans-serif;font-size:1.1rem;font-weight:600;color:#92400e;">
-            ⚠️ &nbsp;"{search_term}" is not currently in the PestTrail database.
+            ⚠️ &nbsp;"{_esc(search_term)}" is not currently in the PestTrail database.
           </div>
           <div style="font-size:1.125rem;color:#78350f;margin-top:6px;">
             This pest or pathogen has not yet been added to our verified records.
@@ -1277,7 +1345,7 @@ if search_term and search_term.strip():
         inoc = r.get("inoculum_type","")
         inoc_html = ""
         if inoc and inoc not in ("Not applicable — insect pest","Not applicable — tick",""):
-            inoc_html = f'<div class="pdc-inoculum"><strong>🧫 Inoculum / Transmission:</strong> {inoc}</div>'
+            inoc_html = f'<div class="pdc-inoculum"><strong>🧫 Inoculum / Transmission:</strong> {_esc(inoc)}</div>'
 
         fields = [
             ("Type",              r["pest_type"]),
@@ -1291,7 +1359,7 @@ if search_term and search_term.strip():
         ]
         fields_html = "".join(
             f'<div class="pdc-field"><div class="pdc-field-label">{lbl}</div>'
-            f'<div class="pdc-field-value">{val}</div></div>'
+            f'<div class="pdc-field-value">{_esc(val)}</div></div>'
             for lbl, val in fields
         )
         # Enriched Economic Impact field with source URL + year + verified badge
@@ -1299,29 +1367,31 @@ if search_term and search_term.strip():
         _econ_url   = str(r.get("economic_impact_source_url", "") or "")
         _econ_year  = str(r.get("economic_impact_year", "") or "")
         _econ_vdate = str(r.get("economic_verified_date", "") or "")
-        _src_link = (f'<a href="{_econ_url}" target="_blank" rel="noopener" '
+        # Only http(s) links; anything else (javascript:, data:, junk) gets no link.
+        _src_link = (f'<a href="{html.escape(_econ_url, quote=True)}" target="_blank" rel="noopener" '
             f'style="color:#116AAB;font-size:1.0625rem;text-decoration:none;font-weight:600;'
             f'margin-left:8px;white-space:nowrap;">→ View Source</a>'
-            if _econ_url and _econ_url not in ("", "nan") else "")
+            if re.match(r"^https?://", _econ_url.strip(), re.I) else "")
         _year_badge = (f'<span style="background:#eff6ff;color:#1e3a5f;border-radius:3px;'
             f'font-size:0.875rem;padding:2px 7px;font-weight:600;margin-left:8px;">'
-            f'Est. {_econ_year}</span>'
+            f'Est. {_esc(_econ_year)}</span>'
             if _econ_year and _econ_year not in ("", "nan") else "")
         _vpill = (f'<div style="margin-top:5px;">'
             f'<span style="background:#dcfce7;color:#14532d;border-radius:10px;'
             f'font-size:1.125rem;padding:2px 9px;font-weight:600;">'
-            f'✓ Verified {_econ_vdate}</span></div>'
+            f'✓ Verified {_esc(_econ_vdate)}</span></div>'
             if _econ_vdate and _econ_vdate not in ("", "nan") else "")
         fields_html += (
             f'<div class="pdc-field" style="grid-column:1/-1;">'
             f'<div class="pdc-field-label">Economic Impact</div>'
-            f'<div class="pdc-field-value">{_econ_val}{_year_badge}{_src_link}{_vpill}</div>'
+            f'<div class="pdc-field-value">{_esc(_econ_val)}{_year_badge}{_src_link}{_vpill}</div>'
             f'</div>'
         )
-        _result_label = (f'Closest match for <em>"{search_term}"</em>'
-                         if _is_fuzzy_match else f'Top result for <em>"{search_term}"</em>')
-        _count_label  = (f'Showing {len(filtered)} closest match(es) for "<em>{search_term}</em>"'
-                         if _is_fuzzy_match else f"Showing {len(filtered)} result(s) for '{search_term}'")
+        _q_html = _esc(search_term)
+        _result_label = (f'Closest match for <em>"{_q_html}"</em>'
+                         if _is_fuzzy_match else f'Top result for <em>"{_q_html}"</em>')
+        _count_label  = (f'Showing {len(filtered)} closest match(es) for "<em>{_q_html}</em>"'
+                         if _is_fuzzy_match else f"Showing {len(filtered)} result(s) for '{_q_html}'")
         st.markdown(f"""
         <div class="pdc-name" style="margin-top:20px;">
           {pest_icon(r['pest_type'])} &nbsp;{_result_label}
@@ -1329,17 +1399,17 @@ if search_term and search_term.strip():
         <div class="pest-detail-card">
           <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;">
             <div>
-              <div class="pdc-name">{r['pest_common_name']}</div>
-              <div class="pdc-sci">{r['pest_scientific_name']}</div>
+              <div class="pdc-name">{_esc(r['pest_common_name'])}</div>
+              <div class="pdc-sci">{_esc(r['pest_scientific_name'])}</div>
             </div>
-            <span class="status-badge {bcls}">{sico} {status}</span>
+            <span class="status-badge {bcls}">{sico} {_esc(status)}</span>
           </div>
           <div class="pdc-grid">{fields_html}</div>
           {inoc_html}
           <div class="pdc-footer">
-            <strong>Quarantine:</strong> {r['quarantine_status']} &nbsp;·&nbsp;
-            <strong>Sources:</strong> {r['data_sources']} &nbsp;·&nbsp;
-            <strong>Verified:</strong> {r.get('data_verified_date','N/A')}
+            <strong>Quarantine:</strong> {_esc(r['quarantine_status'])} &nbsp;·&nbsp;
+            <strong>Sources:</strong> {_esc(r['data_sources'])} &nbsp;·&nbsp;
+            <strong>Verified:</strong> {_esc(r.get('data_verified_date','N/A'))}
           </div>
         </div>
         <p style="font-size:1.0625rem;color:#6b7280;margin-bottom:0;">
@@ -1356,7 +1426,7 @@ def two_col_legend(color_map, pull_up=22):
         f'<div style="display:flex;align-items:center;gap:8px;">'
         f'<span style="width:12px;height:12px;border-radius:50%;background:{c};'
         f'flex-shrink:0;display:inline-block;"></span>'
-        f'<span style="font-size:14px;color:#1e293b;">{pt}</span></div>'
+        f'<span style="font-size:14px;color:#1e293b;">{_esc(pt)}</span></div>'
         for pt, c in color_map.items()
     )
     st.markdown(
@@ -1425,7 +1495,7 @@ st.markdown(f"""
     <span class="kpi-icon-overlay">🌿</span>
     <div class="kpi-value">{len(filtered)}</div>
     <div class="kpi-label">Taxa Tracked</div>
-    <div class="kpi-sub">insects · pathogens · nematodes · 1995–2026</div>
+    <div class="kpi-sub">insects · pathogens · nematodes · 1995–{YEAR_MAX}</div>
   </div>
   <div class="kpi-card navy">
     <span class="kpi-icon-overlay">⏱</span>
@@ -1479,24 +1549,24 @@ with tab_policy:
     # ══════════════════════════════════════════════════════════════════════════════
     _pol = load_policy()
     _pg  = _pol.get("policy_gap", {})
-    _updated = _pol.get("_metadata", {}).get("last_updated", "")
+    _updated = _esc(_pol.get("_metadata", {}).get("last_updated", "") or "")
     _updated_str = f" · Data refreshed {_updated}" if _updated else ""
 
-    _damage_label = _pg.get('annual_damage_label','$40B').lstrip('~')
-    _prev_label   = _pg.get('annual_prevention_label','$75M').lstrip('~')
+    _damage_label = _esc(str(_pg.get('annual_damage_label','$40B')).lstrip('~'))
+    _prev_label   = _esc(str(_pg.get('annual_prevention_label','$75M')).lstrip('~'))
     section_header("⚖️", "Federal Investment vs. Documented Economic Damage",
                    f"Observed US invasive pest damage: ~{_damage_label}/year · USDA APHIS EDRR prevention appropriation: ~{_prev_label}/year · loss ratio quantifies the structural underinvestment in early detection and rapid response{_updated_str}")
 
     _src_footnote = "Fantle-Lepczyk et al. 2022 Sci. Total Environ. 806:151318 · USDA APHIS FY2025 Congressional Justification PPA §7721 · Liebhold &amp; Tobin (2008) Annu. Rev. Entomol. 53:387–408"
 
-    _roi_label  = str(_pg.get('roi_per_dollar','$17')).split('(')[0].strip()
-    _pox_roi    = _pg.get('plum_pox_roi','80×')
-    _pox_cost   = _pg.get('plum_pox_cost_million',50)
-    _pox_avoid  = _pg.get('plum_pox_avoided_billion',4)
-    _erad_win   = _pg.get('eradication_window_years',5)
-    _damage_val = _pg.get('annual_damage_label','$40B')
-    _prev_val   = _pg.get('annual_prevention_label','$75M')
-    _loss_ratio = _pg.get('loss_ratio','533×')
+    _roi_label  = _esc(str(_pg.get('roi_per_dollar','$17')).split('(')[0].strip())
+    _pox_roi    = _esc(_pg.get('plum_pox_roi','80×'))
+    _pox_cost   = _esc(_pg.get('plum_pox_cost_million',50))
+    _pox_avoid  = _esc(_pg.get('plum_pox_avoided_billion',4))
+    _erad_win   = _esc(_pg.get('eradication_window_years',5))
+    _damage_val = _esc(_pg.get('annual_damage_label','$40B'))
+    _prev_val   = _esc(_pg.get('annual_prevention_label','$75M'))
+    _loss_ratio = _esc(_pg.get('loss_ratio','533×'))
 
     if is_mobile:
         st.markdown(f"""
@@ -1616,6 +1686,7 @@ with tab_policy:
     _cum["cumulative"] = _cum["new"].cumsum()
     # Filter out pre-1993 outlier — dataset is 1995-focused; 1951 single point distorts x-axis
     _cum_plot = _cum[_cum["_yr"] >= 1993].copy()
+    _trend_max = int(_cum_plot["_yr"].max()) if not _cum_plot.empty else YEAR_MAX
     _fig_trend = _go_pg.Figure()
     # Bars — annual new invasive species detections (1993+)
     _fig_trend.add_trace(_go_pg.Bar(
@@ -1647,11 +1718,11 @@ with tab_policy:
         **BASE
     )
     _fig_trend.update_xaxes(showgrid=True, gridcolor="#e2e8f0", title_text="Year",
-                             range=[1993, 2025], **TICK)
+                             range=[1993, _trend_max + 0.5], **TICK)
     fig_note(
-        "Annual New Detections & Cumulative Established Invasive Species (1993–2025)",
+        f"Annual New Detections & Cumulative Established Invasive Species (1993–{_trend_max})",
         "Bars show new invasive species confirmed in the US each year; the overlaid line tracks the cumulative count of established species since 1993.",
-        "Detection data: USDA-APHIS / USGS US-RIIS (verified April 2026) · One pre-1993 record (1951) excluded from chart, included in cumulative total · "
+        f"Detection data: USDA-APHIS / USGS US-RIIS (records verified {VERIFIED_RANGE}) · One pre-1993 record (1951) excluded from chart, included in cumulative total · "
         "Sources: Fantle-Lepczyk et al. 2022 Sci. Total Environ. 806:151318 · USDA APHIS FY2025 CJ PPA §7721 · "
         "Liebhold & Tobin (2008) Annu. Rev. Entomol. 53:387–408 · OTA 1993 OTA-F-565"
     )
@@ -1694,6 +1765,11 @@ with tab_erad:
 
     # Success rate: completed programs only (excludes ongoing — outcome not yet determined)
     n_completed = n_erad + n_abandoned
+    _aband_names = erad_df.loc[erad_df["eradication_status"].str.contains("abandoned", case=False, na=False),
+                               "pest_common_name"].dropna().tolist()
+    _aband_note = ("" if n_abandoned == 0 else
+                   f"(includes 1 abandoned program — {_esc(_aband_names[0]) if _aband_names else 'unnamed'}) "
+                   if n_abandoned == 1 else f"(includes {n_abandoned} abandoned programs) ")
     success_pct = round(n_erad / n_completed * 100) if n_completed else 0
 
     ecol1, ecol2, ecol3 = st.columns(3)
@@ -1720,11 +1796,11 @@ with tab_erad:
     f'Of {n_completed} completed eradication programs in this dataset, '
     f'<strong>{success_pct}% ({n_erad} of {n_completed})</strong> achieved confirmed elimination. '
     f'{n_ongoing} programs are currently active — outcomes pending. '
-    f'{n_managed} established species are managed through suppression with no eradication program initiated '
-    f'(includes 1 abandoned program — Citrus Canker, USDA APHIS 1995–2006). '
+    f'{n_managed} established species are managed through suppression with no eradication program initiated'
+    f'{" " + _aband_note.strip() if _aband_note else ""}. '
     f'Eradication feasibility declines substantially with detection delay.</span>'
     f'<span style="font-size:1.125rem;color:#a16207;"> — Liebhold &amp; Tobin (2008) Annu. Rev. Entomol. 53:387–408 · '
-    f'Dataset: {len(erad_df)} species, USDA-APHIS / USGS US-RIIS (verified April 2026)</span>'
+    f'Dataset: {len(erad_df)} species, USDA-APHIS / USGS US-RIIS (records verified {VERIFIED_RANGE})</span>'
     f'</div>', unsafe_allow_html=True)
 
     # Detailed eradication table
@@ -2019,23 +2095,25 @@ with tab_sector:
     scols = st.columns(2)
     for i, s in enumerate(SECTOR_DATA):
         with scols[i % 2]:
-            badge_bg  = {"CRITICAL":"#fef2f2","HIGH":"#fff7ed","MODERATE":"#fffbeb"}[s["Risk Level"]]
-            badge_col = {"CRITICAL":"#991b1b","HIGH":"#9a3412","MODERATE":"#713f12"}[s["Risk Level"]]
-            c = s['color']; rl = s['Risk Level']
+            badge_bg  = {"CRITICAL":"#fef2f2","HIGH":"#fff7ed","MODERATE":"#fffbeb"}.get(s["Risk Level"], "#fffbeb")
+            badge_col = {"CRITICAL":"#991b1b","HIGH":"#9a3412","MODERATE":"#713f12"}.get(s["Risk Level"], "#713f12")
+            # color goes into a style attribute: accept only a hex code
+            c = s['color'] if re.match(r"^#[0-9A-Fa-f]{3,8}$", str(s['color'])) else "#EEB638"
+            rl = _esc(s['Risk Level'])
             st.markdown(
 f'<div style="background:#fff;border-left:5px solid {c};border-radius:0 8px 8px 0;padding:16px 20px;margin-bottom:12px;box-shadow:0 2px 10px rgba(7,51,78,0.07);">'
 f'<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">'
-f'<span style="font-family:Oswald,sans-serif;font-size:1.1rem;font-weight:700;color:#07334E;">{s["Sector"]}</span>'
+f'<span style="font-family:Oswald,sans-serif;font-size:1.1rem;font-weight:700;color:#07334E;">{_esc(s["Sector"])}</span>'
 f'<span style="background:{badge_bg};color:{badge_col};border:1px solid {badge_col}33;border-radius:3px;font-size:1.0625rem;font-weight:700;letter-spacing:0.08em;padding:3px 8px;white-space:nowrap;">{rl}</span>'
 f'</div>'
-f'<div style="font-size:1.0625rem;color:#374151;margin-top:6px;">🐛 {s["Key Pests"]}</div>'
+f'<div style="font-size:1.0625rem;color:#374151;margin-top:6px;">🐛 {_esc(s["Key Pests"])}</div>'
 f'<div style="display:flex;gap:20px;margin-top:8px;">'
 f'<div><div style="font-size:1.0625rem;color:#6b7280;text-transform:uppercase;font-weight:700;">Est. Annual Damage</div>'
-f'<div style="font-family:Oswald,sans-serif;font-size:1.1rem;color:{c};font-weight:600;">{s["Damage/yr"]}</div></div>'
+f'<div style="font-family:Oswald,sans-serif;font-size:1.1rem;color:{c};font-weight:600;">{_esc(s["Damage/yr"])}</div></div>'
 f'<div><div style="font-size:1.0625rem;color:#6b7280;text-transform:uppercase;font-weight:700;">States at Risk</div>'
-f'<div style="font-size:1.125rem;color:#374151;">{s["States at Risk"]}</div></div>'
+f'<div style="font-size:1.125rem;color:#374151;">{_esc(s["States at Risk"])}</div></div>'
 f'</div>'
-f'<div style="font-size:1.0625rem;color:#4b5563;margin-top:8px;border-top:1px solid #f1f5f9;padding-top:6px;">📚 {s["Source"]}</div>'
+f'<div style="font-size:1.0625rem;color:#4b5563;margin-top:8px;border-top:1px solid #f1f5f9;padding-top:6px;">📚 {_esc(s["Source"])}</div>'
 f'</div>', unsafe_allow_html=True)
 
     # ══════════════════════════════════════════════════════════════════════════════
@@ -2084,23 +2162,23 @@ f'</div>', unsafe_allow_html=True)
 f'<div style="background:#07334E;border-radius:10px;padding:18px 22px;margin-bottom:10px;border-left:6px solid #EEB638;">'
 f'<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">'
 f'<div style="flex:1;">'
-f'<span style="font-family:Oswald,sans-serif;font-size:1.05rem;font-weight:700;color:#fff;">{row["pest_common_name"]}</span>'
+f'<span style="font-family:Oswald,sans-serif;font-size:1.05rem;font-weight:700;color:#fff;">{_esc(row["pest_common_name"])}</span>'
 f'{old_badge}'
-f'<span style="font-style:italic;color:#b8d8ec;font-size:1.0625rem;margin-left:8px;display:block;margin-top:2px;">{row.get("pest_scientific_name","")}</span>'
+f'<span style="font-style:italic;color:#b8d8ec;font-size:1.0625rem;margin-left:8px;display:block;margin-top:2px;">{_esc(row.get("pest_scientific_name",""))}</span>'
 f'</div>'
 f'<span style="font-family:Oswald,sans-serif;font-size:{cost_size};font-weight:700;color:{cost_color};'
 f'white-space:{"normal" if is_ylh else "nowrap"};text-align:right;max-width:{"200px" if is_ylh else "none"};">'
-f'{cost_display}</span>'
+f'{_esc(cost_display)}</span>'
 f'</div>'
 f'<div style="display:flex;gap:16px;margin-top:12px;flex-wrap:wrap;">'
 f'<div style="flex:1;min-width:120px;"><div style="font-size:1.0625rem;color:#b8d8ec;text-transform:uppercase;letter-spacing:0.1em;font-weight:700;">Pest Type</div>'
-f'<div style="font-size:1.0625rem;color:#d0e8f2;margin-top:2px;">{row.get("pest_type","")}</div></div>'
+f'<div style="font-size:1.0625rem;color:#d0e8f2;margin-top:2px;">{_esc(row.get("pest_type",""))}</div></div>'
 f'<div style="flex:1;min-width:120px;"><div style="font-size:1.0625rem;color:#b8d8ec;text-transform:uppercase;letter-spacing:0.1em;font-weight:700;">Host / Sector</div>'
-f'<div style="font-size:1.0625rem;color:#d0e8f2;margin-top:2px;">{row.get("impact_sector","")}</div></div>'
+f'<div style="font-size:1.0625rem;color:#d0e8f2;margin-top:2px;">{_esc(row.get("impact_sector",""))}</div></div>'
 f'<div style="flex:1;min-width:120px;"><div style="font-size:1.0625rem;color:#b8d8ec;text-transform:uppercase;letter-spacing:0.1em;font-weight:700;">Current Status</div>'
-f'<div style="font-size:1.0625rem;color:#d0e8f2;margin-top:2px;">{row.get("eradication_status","Established")}</div></div>'
+f'<div style="font-size:1.0625rem;color:#d0e8f2;margin-top:2px;">{_esc(row.get("eradication_status","Established"))}</div></div>'
 f'</div>'
-f'<div style="font-size:1.0625rem;color:#8ec4d8;margin-top:10px;padding-top:8px;border-top:1px solid rgba(134,178,51,0.15);">📚 {src}</div>'
+f'<div style="font-size:1.0625rem;color:#8ec4d8;margin-top:10px;padding-top:8px;border-top:1px solid rgba(134,178,51,0.15);">📚 {_esc(src)}</div>'
 f'</div>', unsafe_allow_html=True)
     else:
         st.info("No projected economic scenarios in current dataset.")
@@ -2136,6 +2214,7 @@ f'</div>', unsafe_allow_html=True)
             intel = THREAT_INTEL.get(name, {})
             risk  = intel.get("risk", "MONITORED")
             color = intel.get("color", "#116AAB")
+            color = color if re.match(r"^#[0-9A-Fa-f]{3,8}$", str(color)) else "#116AAB"
             badge_bg  = {"CRITICAL":"#fef2f2","HIGH":"#fff7ed","MONITORED":"#eff6ff"}.get(risk,"#eff6ff")
             badge_col = {"CRITICAL":"#991b1b","HIGH":"#9a3412","MONITORED":"#1e3a5f"}.get(risk,"#1e3a5f")
             pathway_val = intel.get('pathway', row.get('mode_of_entry','Unknown'))
@@ -2147,20 +2226,20 @@ f'</div>', unsafe_allow_html=True)
             st.markdown(
 f'<div style="background:#07334E;border-radius:10px;padding:20px 28px;margin-bottom:10px;border-left:6px solid {color};">'
 f'<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">'
-f'<div><span style="background:{badge_bg};color:{badge_col};border:1px solid {badge_col}44;border-radius:3px;font-size:1.0625rem;font-weight:700;padding:3px 8px;margin-right:10px;">{risk}</span>'
-f'<span style="font-family:Oswald,sans-serif;font-size:1.2rem;font-weight:700;color:#fff;">{name}</span>'
-f'<span style="font-style:italic;color:#b8d8ec;font-size:1.125rem;margin-left:10px;">{sci_val}</span></div>'
-f'<span style="font-size:1.125rem;color:#EEB638;font-weight:600;">🌍 Origin: {origin_val}</span>'
+f'<div><span style="background:{badge_bg};color:{badge_col};border:1px solid {badge_col}44;border-radius:3px;font-size:1.0625rem;font-weight:700;padding:3px 8px;margin-right:10px;">{_esc(risk)}</span>'
+f'<span style="font-family:Oswald,sans-serif;font-size:1.2rem;font-weight:700;color:#fff;">{_esc(name)}</span>'
+f'<span style="font-style:italic;color:#b8d8ec;font-size:1.125rem;margin-left:10px;">{_esc(sci_val)}</span></div>'
+f'<span style="font-size:1.125rem;color:#EEB638;font-weight:600;">🌍 Origin: {_esc(origin_val)}</span>'
 f'</div>'
 f'<div style="display:flex;gap:16px;margin-top:14px;flex-wrap:wrap;">'
 f'<div style="flex:1;min-width:140px;"><div style="font-size:1.0625rem;color:#b8d8ec;text-transform:uppercase;letter-spacing:0.1em;font-weight:700;">Entry Pathway</div>'
-f'<div style="font-size:1.125rem;color:#d0e8f2;margin-top:3px;">{pathway_val}</div></div>'
+f'<div style="font-size:1.125rem;color:#d0e8f2;margin-top:3px;">{_esc(pathway_val)}</div></div>'
 f'<div style="flex:1;min-width:140px;"><div style="font-size:1.0625rem;color:#b8d8ec;text-transform:uppercase;letter-spacing:0.1em;font-weight:700;">If Established</div>'
-f'<div style="font-size:1.125rem;color:#f87171;font-weight:600;margin-top:3px;">{impact_val}</div></div>'
+f'<div style="font-size:1.125rem;color:#f87171;font-weight:600;margin-top:3px;">{_esc(impact_val)}</div></div>'
 f'<div style="flex:1;min-width:140px;"><div style="font-size:1.0625rem;color:#b8d8ec;text-transform:uppercase;letter-spacing:0.1em;font-weight:700;">Host / Crop</div>'
-f'<div style="font-size:1.125rem;color:#d0e8f2;margin-top:3px;">{host_val}</div></div>'
+f'<div style="font-size:1.125rem;color:#d0e8f2;margin-top:3px;">{_esc(host_val)}</div></div>'
 f'</div>'
-f'<div style="font-size:1.0625rem;color:#8ec4d8;margin-top:10px;padding-top:8px;border-top:1px solid rgba(134,178,51,0.15);">📚 {src_val}</div>'
+f'<div style="font-size:1.0625rem;color:#8ec4d8;margin-top:10px;padding-top:8px;border-top:1px solid rgba(134,178,51,0.15);">📚 {_esc(src_val)}</div>'
 f'</div>', unsafe_allow_html=True)
     else:
         st.info("No 'Not Yet Arrived' records match current filters.")
@@ -2530,12 +2609,12 @@ with tab_pathway:
 # ══════════════════════════════════════════════════════════════════════════════
 # FOOTER
 # ══════════════════════════════════════════════════════════════════════════════
-st.markdown("""
+st.markdown(f"""
 <div class="site-footer">
   <div class="footer-brand">PESTTRAIL</div>
   <strong>Data sources:</strong>
   USDA APHIS · USGS US-RIIS · USFS · EDDMapS (UGA) · EPPO Global Database · NISIC · Peer-reviewed literature<br/>
-  <strong>Verified:</strong> April 2026 · Cross-checked against USDA APHIS, USFS, Cornell &amp; UGA Extension<br/>
+  <strong>Verified:</strong> {VERIFIED_RANGE} · Cross-checked against USDA APHIS, USFS, Cornell &amp; UGA Extension<br/>
   <strong>Built by</strong>
   <a href="https://www.linkedin.com/in/mary-akinyuwa-700268165/">Mary Akinyuwa</a>
   · Life Scientist &amp; AI Strategist &nbsp;|&nbsp;

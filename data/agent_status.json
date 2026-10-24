@@ -1,0 +1,68 @@
+{
+  "policy": {
+    "last_attempt_utc": "2026-10-24T16:07:09Z",
+    "last_attempt_ok": true,
+    "summary": {
+      "proposals": 1,
+      "applied": 0,
+      "rejected": 1,
+      "deferred": 0,
+      "verifier_errors": 0
+    },
+    "usage": {
+      "calls": 2,
+      "input_tokens": 583237,
+      "cache_read_tokens": 0,
+      "output_tokens": 9144,
+      "web_searches": 30
+    },
+    "estimated_cost_usd": 2.82,
+    "model": "claude-opus-5-5",
+    "last_success_utc": "2026-10-24T16:07:09Z"
+  },
+  "daily": {
+    "last_attempt_utc": "2026-10-24T16:10:24Z",
+    "last_attempt_ok": true,
+    "summary": {
+      "candidates": 0,
+      "added": 0,
+      "rejected": 0,
+      "state_reports": 1,
+      "states_added": 0,
+      "verifier_errors": 0
+    },
+    "usage": {
+      "calls": 2,
+      "input_tokens": 308844,
+      "cache_read_tokens": 0,
+      "output_tokens": 5502,
+      "web_searches": 32
+    },
+    "estimated_cost_usd": 1.67,
+    "model": "claude-opus-5-5",
+    "last_success_utc": "2026-10-24T16:10:24Z"
+  },
+  "validate": {
+    "last_attempt_utc": "2026-10-24T16:13:53Z",
+    "last_attempt_ok": false,
+    "summary": {
+      "due": 49,
+      "confirmed_current": 3,
+      "updated": 4,
+      "rejected": 7,
+      "unverifiable": 9,
+      "flagged": 0,
+      "verifier_errors": 1,
+      "failed_batches": 4
+    },
+    "usage": {
+      "calls": 14,
+      "input_tokens": 4352504,
+      "cache_read_tokens": 0,
+      "output_tokens": 87957,
+      "web_searches": 232
+    },
+    "estimated_cost_usd": 21.49,
+    "model": "claude-opus-5-5"
+  }
+}

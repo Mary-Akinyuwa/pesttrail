@@ -4,7 +4,9 @@
     "update_source": "Fantle-Lepczyk et al. 2022 Sci. Total Environ. 806:151318 · USDA APHIS FY2025 PPA 7721 Spending Plan · Diagne et al. 2021 Nature 592:571-576 · USDA ERS Fruit and Tree Nuts Outlook 2024 · USDA FS FHP Annual Report 2022 · Bandara et al. 2025 Plant Dis. · USDA ERS Wheat Outlook 2024 · Harper et al. 2019 Penn State Ext. · Bee Informed Partnership 2024-25",
     "next_review": "2027-01-01",
     "agent_version": "3.0",
-    "sanity_check": "PestTrail Sanity Check Agent — 20/20 claims verified April 2026"
+    "sanity_check": "PestTrail Sanity Check Agent — 20/20 claims verified April 2026",
+    "last_checked": "2026-10-24",
+    "maintained_by": "PestTrail data agent (claude-opus-5-5, web search, two-pass verification)"
   },
   "policy_gap": {
     "annual_damage_billion": 21,

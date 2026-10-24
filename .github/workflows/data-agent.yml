@@ -1,0 +1,125 @@
+name: PestTrail Data Agent
+
+# Keeps the dataset current without depending on a laptop being awake.
+# Each run executes data_update_agent.py, then commits whatever it confirmed;
+# Streamlit Cloud redeploys on the push. Only two-pass-verified changes are
+# ever written, and data/verification_log.csv records every outcome.
+#
+# Requires the repository secret ANTHROPIC_API_KEY
+# (Settings → Secrets and variables → Actions → New repository secret).
+# A failed run turns red and GitHub emails the repo owner.
+
+on:
+  schedule:
+    # The scan looks back 60 days, so a weekly run covers every week ~8 times
+    # over. Daily cost ~$1/run for no extra coverage.
+    - cron: '17 11 * * 4'   # Thursdays  — new detections ("daily" mode)
+    - cron: '41 12 * * 1'   # Mondays    — re-verify the stalest records
+    - cron: '23 13 1 * *'   # 1st of month — policy figures
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: 'Which job to run'
+        type: choice
+        options: [daily, validate, validate-all, policy]
+        default: daily
+
+permissions:
+  contents: write
+  issues: write   # a run that publishes or flags something opens an issue → GitHub emails the owner
+
+concurrency:
+  group: data-agent      # never two runs editing the CSV at once
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install agent dependencies
+        run: pip install --quiet "anthropic>=0.125.0" "pandas>=2.0.0" "python-dotenv>=1.0.0"
+
+      - name: Pick mode
+        id: mode
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            MODE="${{ inputs.mode }}"
+          else
+            case "${{ github.event.schedule }}" in
+              '41 12 * * 1') MODE=validate ;;
+              '23 13 1 * *') MODE=policy ;;
+              *)             MODE=daily ;;
+            esac
+          fi
+          case "$MODE" in
+            daily)        ARGS="" ;;
+            validate)     ARGS="--validate" ;;
+            validate-all) ARGS="--validate --all" ;;
+            policy)       ARGS="--policy" ;;
+          esac
+          echo "mode=$MODE" >> "$GITHUB_OUTPUT"
+          echo "args=$ARGS" >> "$GITHUB_OUTPUT"
+
+      - name: Run agent
+        id: agent
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: python data_update_agent.py ${{ steps.mode.outputs.args }}
+
+      # Runs even when the agent failed part-way: anything already written was
+      # verified, and the status file records the failure for the dashboard.
+      - name: Commit verified changes
+        id: commit
+        if: always() && steps.mode.outcome == 'success'
+        run: |
+          git config user.name  "pesttrail-data-agent[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          for f in data/invasive_pests_1995_2025.csv data/policy_intelligence.json \
+                   data/agent_status.json data/verification_log.csv; do
+            [ -f "$f" ] && git add "$f"
+          done
+          if git diff --cached --quiet; then
+            echo "Nothing to commit."
+            exit 0
+          fi
+          git commit -m "data: ${{ steps.mode.outputs.mode }} run $(date -u +%Y-%m-%d)"
+          for i in 1 2 3; do
+            git pull --rebase --quiet && git push && exit 0
+            git rebase --abort 2>/dev/null || true   # never leave a half-done rebase for the next try
+            sleep 10
+          done
+          echo "::error::Push failed after 3 attempts"
+          exit 1
+
+      # The agent writes analytics/run_report.md only when it published a verified
+      # change (status changes first) or found something a person must decide.
+      # Only after a successful push — the issue must never announce changes that aren't live.
+      - name: Report changes
+        if: always() && steps.commit.outcome == 'success'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          REPORT=analytics/run_report.md
+          if [ ! -s "$REPORT" ]; then
+            echo "No changes and nothing to review." >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          cat "$REPORT" >> "$GITHUB_STEP_SUMMARY"
+          { tail -n +2 "$REPORT"; echo; echo "Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"; } > body.md
+          gh issue create --title "$(head -n 1 "$REPORT")" --body-file body.md
+
+      - name: Upload run log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: agent-log-${{ steps.mode.outputs.mode }}-${{ github.run_id }}
+          path: analytics/update_agent.log
+          if-no-files-found: ignore
+          retention-days: 30
