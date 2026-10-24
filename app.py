@@ -1116,8 +1116,8 @@ def load_agent_status():
         return {}
     return _st if isinstance(_st, dict) else {}
 
-def _fmt_day(ts):
-    return f"{ts:%b} {ts.day}, {ts.year}"
+def _fmt_month(ts):
+    return f"{ts:%B %Y}"
 
 def _esc(v):
     """HTML-escape any CSV/JSON/user value before it goes into unsafe_allow_html markup."""
@@ -1138,7 +1138,7 @@ _ymax_data = df["year_first_detected_us"].max()
 YEAR_MAX = max(datetime.now(timezone.utc).year, int(_ymax_data) if pd.notna(_ymax_data) else 0)
 _last_ok = [m.get("last_success_utc", "") for m in load_agent_status().values() if isinstance(m, dict)]
 _last_ok = pd.to_datetime(pd.Series(_last_ok, dtype=object), errors="coerce", utc=True, format="mixed").dropna()
-LAST_CHECKED = _fmt_day(_last_ok.max()) if not _last_ok.empty else ""
+LAST_CHECKED = _fmt_month(_last_ok.max()) if not _last_ok.empty else ""
 
 # ══════════════════════════════════════════════════════════════════════════════
 # SIDEBAR
@@ -1163,9 +1163,11 @@ st.sidebar.markdown(f"""
 """, unsafe_allow_html=True)
 
 if LAST_CHECKED:
-    st.sidebar.caption(f"Agent-maintained · last checked {LAST_CHECKED} · records verified {VERIFIED_RANGE} · **{len(df)} records**")
+    st.sidebar.caption(f"Agent-maintained · last checked {LAST_CHECKED} · **{len(df)} records**")
+elif not _vdates.empty:
+    st.sidebar.caption(f"Last verified {_fmt_month(_vdates.max())} · **{len(df)} records**")
 else:
-    st.sidebar.caption(f"Records verified {VERIFIED_RANGE} · **{len(df)} records**")
+    st.sidebar.caption(f"**{len(df)} records**")
 if st.sidebar.button("↻ Reload dataset"):
     st.cache_data.clear(); st.rerun()
 st.sidebar.markdown("---")
