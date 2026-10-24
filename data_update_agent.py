@@ -311,12 +311,18 @@ MIN_REVERIFY_DAYS = 21    # an Established record is not re-checked sooner than 
 WATCH_REVERIFY_DAYS = 6   # a watch-list record (status in motion) is due again after this
 BATCH_SIZE        = 8
 MAX_POLICY_CHECKS = 10    # policy proposals sent to the verifier per run
+# A validation run stops starting new batches once its estimated spend passes this;
+# the records it did not reach stay unverified and are first in line next run. The
+# 2026-10-24 full run cost ~$42 and hit the workspace's $40/month limit mid-verification.
+VALIDATE_BUDGET_USD = 22
 
 # Rough cost estimate shown in agent_status.json — Opus 5.5 $4 / $20 per M tokens,
-# web search $10 per 1,000 searches. Not a bill; the Anthropic console is the bill.
-PRICE_IN, PRICE_CACHE_READ, PRICE_OUT, PRICE_SEARCH = 4.00e-6, 0.20e-6, 20.00e-6, 10.00e-3
+# cache writes 1.25× and reads 0.1× input, web search $10 per 1,000 searches.
+# Not a bill; the Anthropic console is the bill.
+PRICE_IN, PRICE_CACHE_WRITE, PRICE_CACHE_READ, PRICE_OUT, PRICE_SEARCH = 4.00e-6, 5.00e-6, 0.40e-6, 20.00e-6, 10.00e-3
 
-USAGE   = {"calls": 0, "input_tokens": 0, "cache_read_tokens": 0, "output_tokens": 0, "web_searches": 0}
+USAGE   = {"calls": 0, "input_tokens": 0, "cache_write_tokens": 0, "cache_read_tokens": 0,
+           "output_tokens": 0, "web_searches": 0}
 SUMMARY = {}   # filled by the mode that runs; written to agent_status.json
 
 
@@ -418,6 +424,15 @@ def log_verification(mode: str, subject: str, field: str, old, new,
                     cell(old)[:300], cell(new)[:300], verdict, cell(evidence_url), cell(note)[:300]])
 
 
+def already_flagged(subject: str, field: str) -> bool:
+    """True if an earlier run already sent this field of this record for human review."""
+    if not VERIFICATION_LOG_PATH.exists():
+        return False
+    with open(VERIFICATION_LOG_PATH, encoding="utf-8", newline="") as f:
+        return any(r.get("subject") == subject and r.get("field") == field
+                   and r.get("verdict") == "rejected — sent for human review" for r in csv.DictReader(f))
+
+
 def already_logged(subject: str, field: str) -> bool:
     if not VERIFICATION_LOG_PATH.exists():
         return False
@@ -507,15 +522,17 @@ RETRYABLE_STATUS = {429, 500, 502, 503, 504, 529}
 
 def _track_usage(usage):
     USAGE["calls"] += 1
-    USAGE["input_tokens"]      += (usage.input_tokens or 0) + (getattr(usage, "cache_creation_input_tokens", 0) or 0)
-    USAGE["cache_read_tokens"] += getattr(usage, "cache_read_input_tokens", 0) or 0
+    USAGE["input_tokens"]       += usage.input_tokens or 0
+    USAGE["cache_write_tokens"] += getattr(usage, "cache_creation_input_tokens", 0) or 0
+    USAGE["cache_read_tokens"]  += getattr(usage, "cache_read_input_tokens", 0) or 0
     USAGE["output_tokens"]     += usage.output_tokens or 0
     stu = getattr(usage, "server_tool_use", None)
     USAGE["web_searches"]      += (getattr(stu, "web_search_requests", 0) or 0) if stu else 0
 
 
 def estimated_cost() -> float:
-    return round(USAGE["input_tokens"] * PRICE_IN + USAGE["cache_read_tokens"] * PRICE_CACHE_READ
+    return round(USAGE["input_tokens"] * PRICE_IN + USAGE["cache_write_tokens"] * PRICE_CACHE_WRITE
+                 + USAGE["cache_read_tokens"] * PRICE_CACHE_READ
                  + USAGE["output_tokens"] * PRICE_OUT + USAGE["web_searches"] * PRICE_SEARCH, 2)
 
 
@@ -548,6 +565,10 @@ def call_claude(client: anthropic.Anthropic, prompt: str, label: str,
                     tools=[WEB_SEARCH_TOOL],
                     betas=[FALLBACK_BETA],
                     fallbacks="default",
+                    # Each web search re-sends the growing turn; caching bills the
+                    # repeated prefix at a tenth of the input price. The 10/24 run
+                    # had none: 8.5M input tokens, 0 read from cache.
+                    cache_control={"type": "ephemeral"},
                 ) as stream:
                     final = stream.get_final_message()
                 _track_usage(final.usage)
@@ -647,12 +668,46 @@ Confirm it only if ALL of these hold:
 
 Otherwise reject it. When unsure, reject — the database keeps its current value.
 
+If the change lists several "fields", judge EACH field on its own against these rules: one
+unsupported field must not sink the others, and one supported field must not carry them.
+For a field you reject, also say whether a source you found yourself shows its CURRENT
+value is still accurate. Include "fields" (one entry per listed field) only when the change
+lists fields.
+
 OUTPUT: a single JSON object only:
-{{"verdict": "confirmed" or "rejected",
+{{"verdict": "confirmed" only if every field is confirmed, else "rejected",
   "evidence_url": "URL of the page from your own search that settles it",
   "evidence": "one sentence: what that page says",
-  "reason": "one sentence"}}
+  "reason": "one sentence",
+  "fields": [
+    {{"field": "field name",
+      "verdict": "confirmed" or "rejected",
+      "evidence_url": "URL from your own search: for a confirmed field, the page stating the
+                       proposed value; for a rejected one, the page showing the current value
+                       is still accurate (empty if none)",
+      "evidence": "one sentence",
+      "current_value_still_accurate": true, false, or null (rejected fields only; null = could not tell)}}
+  ]}}
 """
+
+
+# Fields that only make sense together; a per-field verdict never splits them.
+LINKED_FIELDS = [("economic_impact_usd", "economic_impact_year"),
+                 ("origin_country", "origin_region"),
+                 ("mode_of_entry", "commodity_pathway")]
+
+
+def field_key(f) -> str:
+    """'Quarantine status', 'quarantine_status ' and 'quarantine_status' are one field."""
+    return re.sub(r"[\s_]+", "_", norm(f))
+
+
+@dataclass
+class FieldVerdict:
+    status: str             # "confirmed" | "rejected"
+    url: str = ""
+    note: str = ""
+    current_ok: bool = False  # rejected, but the verifier's own source supports the current value
 
 
 @dataclass
@@ -660,6 +715,7 @@ class Verdict:
     status: str      # "confirmed" | "rejected" | "error"
     url: str = ""
     note: str = ""
+    fields: dict = None   # field -> FieldVerdict when the verifier judged fields one by one
 
 
 def verify_change(client: anthropic.Anthropic, claim: dict, label: str) -> Verdict:
@@ -677,11 +733,28 @@ def verify_change(client: anthropic.Anthropic, claim: dict, label: str) -> Verdi
     if not parsed or not isinstance(out, dict):
         return Verdict("error", note="verifier answer was not valid JSON")
     url = cell(out.get("evidence_url"))
+    fields = None
+    if isinstance(out.get("fields"), list):
+        fields = {}
+        for f in out["fields"]:
+            if not isinstance(f, dict) or not cell(f.get("field")):
+                continue
+            f_url = cell(f.get("evidence_url"))
+            own = f_url.startswith("http") and res.saw(f_url)
+            note = cell(f.get("evidence")) or cell(out.get("reason"))
+            if f.get("verdict") == "confirmed" and own:
+                fields[cell(f["field"])] = FieldVerdict("confirmed", f_url, note)
+            elif f.get("verdict") == "confirmed":
+                fields[cell(f["field"])] = FieldVerdict(
+                    "rejected", f_url, "evidence URL was not among the verifier's own search results")
+            else:
+                fields[cell(f["field"])] = FieldVerdict(
+                    "rejected", f_url, note, current_ok=own and f.get("current_value_still_accurate") is True)
     if out.get("verdict") != "confirmed":
-        return Verdict("rejected", url, cell(out.get("reason") or out.get("evidence")))
+        return Verdict("rejected", url, cell(out.get("reason") or out.get("evidence")), fields)
     if not url.startswith("http") or not res.saw(url):
-        return Verdict("rejected", url, "evidence URL was not among the verifier's own search results")
-    return Verdict("confirmed", url, cell(out.get("evidence") or out.get("reason")))
+        return Verdict("rejected", url, "evidence URL was not among the verifier's own search results", fields)
+    return Verdict("confirmed", url, cell(out.get("evidence") or out.get("reason")), fields)
 
 
 # ── New records (daily + backfill) ────────────────────────────────────────────
@@ -976,8 +1049,9 @@ def run_validate(client: anthropic.Anthropic, everything: bool = False) -> bool:
     log.info(f"{len(due_idx)} record(s) due for re-verification "
              f"({int(watch[due_idx].sum())} on the watch list, then stalest first).")
 
-    stats = {"due": len(due_idx), "confirmed_current": 0, "updated": 0, "rejected": 0,
-             "unverifiable": 0, "flagged": 0, "verifier_errors": 0, "failed_batches": 0}
+    stats = {"due": len(due_idx), "confirmed_current": 0, "updated": 0, "partly_updated": 0, "rejected": 0,
+             "unverifiable": 0, "flagged": 0, "verifier_errors": 0, "failed_batches": 0,
+             "deferred_for_budget": 0}
     batches = [due_idx[i:i + BATCH_SIZE] for i in range(0, len(due_idx), BATCH_SIZE)]
 
     def unverifiable(name, note):
@@ -985,6 +1059,12 @@ def run_validate(client: anthropic.Anthropic, everything: bool = False) -> bool:
         stats["unverifiable"] += 1
 
     for b_idx, batch in enumerate(batches, 1):
+        if estimated_cost() >= VALIDATE_BUDGET_USD:
+            # Not a failure: the rest keep their old dates and lead the next run.
+            stats["deferred_for_budget"] = sum(len(b) for b in batches[b_idx - 1:])
+            log.warning(f"Estimated spend ${estimated_cost():.2f} reached the ${VALIDATE_BUDGET_USD} run budget — "
+                        f"{stats['deferred_for_budget']} record(s) left for the next run.")
+            break
         log.info(f"\n[Validation batch {b_idx}/{len(batches)}]")
         records_for_prompt = [{
             "pest_common_name":        df.at[i, "pest_common_name"],
@@ -1094,23 +1174,70 @@ def run_validate(client: anthropic.Anthropic, everything: bool = False) -> bool:
                     "cited_sources": sources,
                 }
                 vr = verify_change(client, claim, name)
-                outcome = {"confirmed": "confirmed", "rejected": "rejected", "error": "verifier error"}[vr.status]
-                for f, val in proposed.items():
-                    log_verification("validate", name, f, df.at[i, f], val, outcome, vr.url, vr.note)
-                if vr.status != "confirmed":
-                    log.info(f"  ✗ {vr.status.upper()} update to {name} — {vr.note}")
-                    stats["verifier_errors" if vr.status == "error" else "rejected"] += 1
+                if vr.status == "error":
+                    for f, val in proposed.items():
+                        log_verification("validate", name, f, df.at[i, f], val, "verifier error", vr.url, vr.note)
+                    log.info(f"  ✗ ERROR verifying {name} — {vr.note}")
+                    stats["verifier_errors"] += 1
                     continue
-                for f, val in proposed.items():
-                    record_change("published", name, f, df.at[i, f], val, vr.url, vr.note)
-                    df.at[i, f] = val
-                    log.info(f"  ~ UPDATED {name}: {f} -> {val[:60]}")
-                if "economic_impact_usd" in proposed:
+                if vr.fields is None:
+                    # No per-field answer: all or nothing on the overall verdict.
+                    per_field = {f: FieldVerdict(vr.status, vr.url, vr.note) for f in proposed}
+                else:
+                    # A field the verifier did not judge is not confirmed.
+                    judged = {field_key(f): fv for f, fv in vr.fields.items()}
+                    per_field = {f: judged.get(field_key(f), FieldVerdict("rejected", note="the verifier did not judge this field"))
+                                 for f in proposed}
+                for group in LINKED_FIELDS:
+                    # A dollar figure next to someone else's year (or a country next to another
+                    # region) is a pairing no source states: publish the group whole or not at all.
+                    members = [f for f in group if f in per_field]
+                    held = [f for f in members if per_field[f].status != "confirmed"]
+                    if held and len(held) < len(members):
+                        for f in members:
+                            if per_field[f].status == "confirmed":
+                                per_field[f] = FieldVerdict("rejected", per_field[f].url,
+                                                            f"confirmed, but held back: linked field {', '.join(held)} was not")
+                confirmed = {f: fv for f, fv in per_field.items() if fv.status == "confirmed"}
+                # Rejected fields whose CURRENT value the verifier's own source supports are
+                # settled. A rejected data_sources entry is settled too (the new citation is
+                # simply not appended) but confirms nothing. The rest are open questions.
+                kept = {f: fv for f, fv in per_field.items() if fv.status != "confirmed" and fv.current_ok}
+                dropped = {f: fv for f, fv in per_field.items()
+                           if fv.status != "confirmed" and not fv.current_ok and f == "data_sources"}
+                open_q = {f: fv for f, fv in per_field.items()
+                          if fv.status != "confirmed" and f not in kept and f not in dropped}
+                for f, fv in per_field.items():
+                    outcome = ("confirmed" if f in confirmed else
+                               "rejected — current value confirmed" if f in kept else
+                               "rejected — citation not added" if f in dropped else
+                               "rejected — sent for human review")
+                    repeat = f in open_q and already_flagged(name, f)
+                    log_verification("validate", name, f, df.at[i, f], proposed[f], outcome, fv.url, fv.note)
+                    if f in open_q and not repeat:
+                        # Raised once; later runs that reach the same impasse only log it.
+                        record_change("review", name, f, df.at[i, f], proposed[f], fv.url,
+                                      f"second check did not confirm this: {fv.note}")
+                for f, fv in confirmed.items():
+                    record_change("published", name, f, df.at[i, f], proposed[f], fv.url, fv.note)
+                    df.at[i, f] = proposed[f]
+                    log.info(f"  ~ UPDATED {name}: {f} -> {proposed[f][:60]}")
+                if "economic_impact_usd" in confirmed:
                     # Two-pass confirmed, so the economic badge may carry today's date.
-                    df.at[i, "economic_impact_source_url"] = vr.url
+                    df.at[i, "economic_impact_source_url"] = confirmed["economic_impact_usd"].url
                     df.at[i, "economic_verified_date"] = today_iso()
+                if open_q:
+                    # The record is not "verified" while a question about it is open.
+                    log.info(f"  ✗ {len(open_q)} field(s) of {name} not confirmed — sent for review"
+                             + (f"; {len(confirmed)} confirmed field(s) published" if confirmed else ""))
+                    stats["partly_updated" if confirmed else "rejected"] += 1
+                    continue
+                if not confirmed and not kept:
+                    # Only a citation was proposed and it was rejected: nothing was confirmed.
+                    stats["rejected"] += 1
+                    continue
                 df.at[i, "data_verified_date"] = today_iso()
-                stats["updated"] += 1
+                stats["updated" if confirmed else "confirmed_current"] += 1
 
             else:
                 unverifiable(name, v.get("note") or f"verdict '{verdict}' with {len(proposed)} real change(s)")
