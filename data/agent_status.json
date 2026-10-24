@@ -43,26 +43,26 @@
     "last_success_utc": "2026-10-24T16:10:24Z"
   },
   "validate": {
-    "last_attempt_utc": "2026-10-24T16:13:53Z",
+    "last_attempt_utc": "2026-10-24T16:53:00Z",
     "last_attempt_ok": false,
     "summary": {
-      "due": 49,
-      "confirmed_current": 3,
-      "updated": 4,
-      "rejected": 7,
-      "unverifiable": 9,
+      "due": 42,
+      "confirmed_current": 9,
+      "updated": 10,
+      "rejected": 19,
+      "unverifiable": 2,
       "flagged": 0,
-      "verifier_errors": 1,
-      "failed_batches": 4
+      "verifier_errors": 2,
+      "failed_batches": 0
     },
     "usage": {
-      "calls": 14,
-      "input_tokens": 4352504,
+      "calls": 35,
+      "input_tokens": 8497631,
       "cache_read_tokens": 0,
-      "output_tokens": 87957,
-      "web_searches": 232
+      "output_tokens": 171500,
+      "web_searches": 425
     },
-    "estimated_cost_usd": 21.49,
+    "estimated_cost_usd": 41.67,
     "model": "claude-opus-5-5"
   }
 }
