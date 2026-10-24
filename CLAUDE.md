@@ -21,10 +21,10 @@ All four agents require `ANTHROPIC_API_KEY` in `.env` or environment:
 
 ```bash
 # Data update agent — scheduled on GitHub Actions (data-agent.yml), not local cron
-python3 data_update_agent.py                # weekly (Thu): new detections (past 60 days)
-python3 data_update_agent.py --validate     # weekly (Mon): re-verify the 16 stalest records
-python3 data_update_agent.py --validate --all  # every record not verified in 21 days
-python3 data_update_agent.py --policy       # monthly: check policy_intelligence.json figures
+python3 data_update_agent.py                # quarterly (1st): new species + new state records (past 100 days)
+python3 data_update_agent.py --validate     # re-verify the 16 stalest records (manual)
+python3 data_update_agent.py --validate --all  # quarterly (2nd): every record not verified in 21 days
+python3 data_update_agent.py --policy       # quarterly (3rd): check policy_intelligence.json figures
 python3 data_update_agent.py --backfill     # one-time: historical sweep 1995–2026
 
 # Economic research — two-pass source verification before writing to CSV
@@ -97,9 +97,9 @@ Two non-obvious constraints are baked in — do not "simplify" past them:
 
 The separate `keep-schedule-alive` job pushes an empty commit when the repo has been quiet 45+ days. GitHub disables scheduled workflows after 60 days of repository inactivity, which silently killed this workflow once already (last push 2026-05-06, last run 2026-07-05).
 
-`.github/workflows/data-agent.yml` runs `data_update_agent.py` (Thu new-detection scan, Mon re-verification, monthly policy check) and commits the data files; the push redeploys Streamlit Cloud. It needs the repo secret `ANTHROPIC_API_KEY`. Each scan costs roughly $1 (Opus 5.5 + ~25 web searches), which is why the scan is weekly — its 60-day look-back makes daily runs redundant. The agent used to run from local cron, which never reached the live app and stopped when the laptop changed (records sat at April 2026 until 2026-10-24).
+`.github/workflows/data-agent.yml` runs `data_update_agent.py` quarterly — Jan/Apr/Jul/Oct: scan on the 1st, full re-verification on the 2nd, policy check on the 3rd — and commits the data files; the push redeploys Streamlit Cloud. It needs the repo secret `ANTHROPIC_API_KEY`. Quarterly was the owner's choice for cost (~$25–30 a quarter: scan ~$2, full re-verification ~$20–25, policy ~$3). The scan's 100-day look-back overlaps consecutive quarters so no detection falls between runs. The agent used to run from local cron, which never reached the live app and stopped when the laptop changed (records sat at April 2026 until 2026-10-24).
 
-What the agent checks: new US species and new state records (Thu scan); eradication outcomes, quarantine, biosurveillance (states, spread), entry pathway/origin (feeds the Origin–Commodity Risk Matrix) and economics per record (Mon, watch-list records — Not Yet Arrived / Eradication Ongoing / Limited Detection — every week, others every ~3–6 weeks); policy gap figures, sector damage/risk and threat risk/pathway (monthly). Source tiers are in `CREDIBLE_SOURCES`: only USDA APHIS / state regulatory officials can confirm a US detection or status; EDDMapS, CABI, EPPO Reporting Service and NAPPO Emerging Pest Alerts are leads only; Emergency Action Notifications are port interceptions, never detections.
+What the agent checks: new US species and new state records; eradication outcomes, quarantine, biosurveillance (states, spread), entry pathway/origin (feeds the Origin–Commodity Risk Matrix) and economics per record (watch-list records — Not Yet Arrived / Eradication Ongoing / Limited Detection — go first); policy gap figures, sector damage/risk and threat risk/pathway. All quarterly. Source tiers are in `CREDIBLE_SOURCES`: only USDA APHIS / state regulatory officials can confirm a US detection or status; EDDMapS, CABI, EPPO Reporting Service and NAPPO Emerging Pest Alerts are leads only; Emergency Action Notifications are port interceptions, never detections.
 
 Agent guarantees — do not weaken them:
 - A record is re-dated only when a call that actually ran web searches confirmed it AND the cited source URL is among the pages those searches returned. API errors, refusals, verifier errors and unusable batches fail the run (exit 1) and change nothing; records the model skipped are left unverified and retried.

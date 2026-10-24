@@ -11,11 +11,12 @@ name: PestTrail Data Agent
 
 on:
   schedule:
-    # The scan looks back 60 days, so a weekly run covers every week ~8 times
-    # over. Daily cost ~$1/run for no extra coverage.
-    - cron: '17 11 * * 4'   # Thursdays  — new detections ("daily" mode)
-    - cron: '41 12 * * 1'   # Mondays    — re-verify the stalest records
-    - cron: '23 13 1 * *'   # 1st of month — policy figures
+    # Quarterly (Jan, Apr, Jul, Oct), to keep cost down (~$25–30 a quarter).
+    # The scan looks back 100 days, so consecutive quarters overlap and no
+    # detection falls between runs; re-verification covers every record due.
+    - cron: '17 11 1 1,4,7,10 *'   # 1st  — new species + new state records ("daily" mode)
+    - cron: '41 12 2 1,4,7,10 *'   # 2nd  — re-verify every record due
+    - cron: '23 13 3 1,4,7,10 *'   # 3rd  — policy, sector and threat figures
   workflow_dispatch:
     inputs:
       mode:
@@ -53,8 +54,8 @@ jobs:
             MODE="${{ inputs.mode }}"
           else
             case "${{ github.event.schedule }}" in
-              '41 12 * * 1') MODE=validate ;;
-              '23 13 1 * *') MODE=policy ;;
+              '41 12 2 1,4,7,10 *') MODE=validate-all ;;
+              '23 13 3 1,4,7,10 *') MODE=policy ;;
               *)             MODE=daily ;;
             esac
           fi

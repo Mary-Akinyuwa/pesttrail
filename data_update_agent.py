@@ -9,16 +9,16 @@ Streamlit Cloud redeploys with the new data.
 Operating modes:
 
   python3 data_update_agent.py
-      Weekly (Thursday): search for NEW US pest/pathogen detections from the
-      past 60 days. Still called "daily" mode; the look-back makes daily runs redundant.
+      Quarterly: search for NEW US species and new state records from the past
+      100 days (overlaps the previous quarter). Still called "daily" mode.
 
   python3 data_update_agent.py --validate [--all]
-      Weekly: re-verify the stalest records (16 per run, or every record not
+      Quarterly with --all: re-verify every record due (16 per run without --all; every record not
       checked in 21 days with --all). Updates eradication status, states,
       quarantine, spread and economic figures when a change is confirmed.
 
   python3 data_update_agent.py --policy
-      Monthly: check the Policy Gap, sector and threat figures for newer
+      Quarterly: check the Policy Gap, sector and threat figures for newer
       authoritative estimates.
 
   python3 data_update_agent.py --backfill
@@ -231,7 +231,7 @@ BACKFILL_PASSES = [
 # ── Daily update query ────────────────────────────────────────────────────────
 DAILY_UPDATE_QUERY = (
     "Search for invasive agricultural pest or plant pathogen events in the United States from "
-    "the past 60 days, of two kinds:\n"
+    "the past 100 days, of two kinds:\n"
     "  A) NEW SPECIES — the first confirmed US detection of a species not previously recorded "
     "in the US;\n"
     "  B) NEW STATE RECORDS — the first confirmed detection, in a new US state or territory, of "
@@ -239,7 +239,7 @@ DAILY_UPDATE_QUERY = (
     "Search: USDA APHIS PPQ pest alerts, program updates, Federal Orders and DA- stakeholder "
     "announcements; state plant regulatory agency alerts (all states and territories, incl. "
     "Hawaii, Puerto Rico and Guam); the CAPS/NAPIS Pest Tracker; NAPPO Official Pest Reports "
-    "filed by the US; peer-reviewed first reports published in the past 90 days. EDDMapS, the "
+    "filed by the US; peer-reviewed first reports published in the past 120 days. EDDMapS, the "
     "EPPO Reporting Service and CABI may point you to an event, but confirm it in an official "
     "source.\n"
     "RULES: A detection counts only when USDA APHIS PPQ (National Identification Services) or a "
@@ -306,9 +306,9 @@ FALLBACK_BETA     = "server-side-fallback-2026-07-01"
 WEB_SEARCH_TOOL   = {"type": "web_search_20260209", "name": "web_search", "max_uses": 25}
 MAX_CONTINUATIONS = 5     # pause_turn resumptions per call
 
-VALIDATE_PER_RUN  = 16    # records re-verified per weekly run: watch list first, then stalest
+VALIDATE_PER_RUN  = 16    # records per run without --all: watch list first, then stalest
 MIN_REVERIFY_DAYS = 21    # an Established record is not re-checked sooner than this
-WATCH_REVERIFY_DAYS = 6   # a watch-list record (status in motion) is re-checked weekly
+WATCH_REVERIFY_DAYS = 6   # a watch-list record (status in motion) is due again after this
 BATCH_SIZE        = 8
 MAX_POLICY_CHECKS = 10    # policy proposals sent to the verifier per run
 
@@ -851,7 +851,7 @@ def add_state_records(client: anthropic.Anthropic, df: pd.DataFrame, reports: li
 
 def run_daily(client: anthropic.Anthropic) -> bool:
     log.info("=" * 65)
-    log.info("PestTrail DETECTION SCAN — new species and new state records (past 60 days)")
+    log.info("PestTrail DETECTION SCAN — new species and new state records (past 100 days)")
     log.info("=" * 65)
     df = load_records()
     names_block = "\n".join(f"  - {n} ({s})" for n, s in
@@ -1354,15 +1354,15 @@ def run_policy_refresh(client: anthropic.Anthropic) -> bool:
         stats["applied"] += 1
         log.info(f"  ~ UPDATED {path} -> {new}")
 
-    # A detection in the US changes the record's eradication_status, which the weekly
+    # A detection in the US changes the record's eradication_status, which the
     # validation (with its own verifier pass) owns. Here it is only reported.
     arrivals = out.get("arrivals")
     for a in arrivals if isinstance(arrivals, list) else []:
         if isinstance(a, dict) and a.get("name"):
             log_verification("policy", a["name"], "possible US arrival", "Not Yet Arrived", a.get("evidence", ""),
-                             "reported — record re-checked by weekly validation", cell(a.get("url")))
+                             "reported — record re-checked by the next validation", cell(a.get("url")))
             record_change("review", a["name"], "possible US arrival", "Not Yet Arrived", a.get("evidence", ""),
-                          a.get("url", ""), "the next Monday validation re-checks this record's status")
+                          a.get("url", ""), "the next quarterly validation re-checks this record's status — or run validate now")
 
     suggestions = out.get("watch_list_suggestions")
     for s in suggestions if isinstance(suggestions, list) else []:
